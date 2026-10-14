@@ -1,0 +1,4 @@
+# Exact HA target and matching published test fixtures.
+homeassistant==2026.10.1
+pytest-homeassistant-custom-component==0.13.372
+home-assistant-frontend==20260930.3

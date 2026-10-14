@@ -1,0 +1,295 @@
+{
+  "checked_at": "2026-10-14T15:57:39.905248+02:00",
+  "sources": [
+    {
+      "provider": "eds",
+      "available": true,
+      "count": 3,
+      "items_count": 3,
+      "error": null,
+      "coverage_end": "2026-10-17",
+      "http": {
+        "requests": [
+          {
+            "url": "https://www.elektrodistribucija.rs/planirana-iskljucenja/planirana-kv",
+            "status": 200,
+            "bytes": 48448,
+            "content_type": "text/html",
+            "charset": "utf-8",
+            "duration_ms": 13699
+          },
+          {
+            "url": "https://www.elektrodistribucija.rs/planirana-iskljucenja-srbija/Kraljevo_Dan_0_Iskljucenja.htm",
+            "status": 200,
+            "bytes": 31549,
+            "content_type": "text/html",
+            "charset": null,
+            "duration_ms": 731
+          },
+          {
+            "url": "https://www.elektrodistribucija.rs/planirana-iskljucenja-srbija/Kraljevo_Dan_2_Iskljucenja.htm",
+            "status": 200,
+            "bytes": 24356,
+            "content_type": "text/html",
+            "charset": null,
+            "duration_ms": 264
+          },
+          {
+            "url": "https://www.elektrodistribucija.rs/planirana-iskljucenja-srbija/Kraljevo_Dan_3_Iskljucenja.htm",
+            "status": 200,
+            "bytes": 2280,
+            "content_type": "text/html",
+            "charset": null,
+            "duration_ms": 199
+          },
+          {
+            "url": "https://www.elektrodistribucija.rs/planirana-iskljucenja-srbija/Kraljevo_Dan_1_Iskljucenja.htm",
+            "status": 200,
+            "bytes": 40751,
+            "content_type": "text/html",
+            "charset": null,
+            "duration_ms": 13231
+          }
+        ],
+        "discovered_pages": [
+          {
+            "slot": 0,
+            "url": "https://www.elektrodistribucija.rs/planirana-iskljucenja-srbija/Kraljevo_Dan_0_Iskljucenja.htm"
+          },
+          {
+            "slot": 1,
+            "url": "https://www.elektrodistribucija.rs/planirana-iskljucenja-srbija/Kraljevo_Dan_1_Iskljucenja.htm"
+          },
+          {
+            "slot": 2,
+            "url": "https://www.elektrodistribucija.rs/planirana-iskljucenja-srbija/Kraljevo_Dan_2_Iskljucenja.htm"
+          },
+          {
+            "slot": 3,
+            "url": "https://www.elektrodistribucija.rs/planirana-iskljucenja-srbija/Kraljevo_Dan_3_Iskljucenja.htm"
+          }
+        ],
+        "parsed_pages": [
+          {
+            "date": "2026-10-14",
+            "url": "https://www.elektrodistribucija.rs/planirana-iskljucenja-srbija/Kraljevo_Dan_0_Iskljucenja.htm",
+            "rows": 35,
+            "matched_rows": 0
+          },
+          {
+            "date": "2026-10-15",
+            "url": "https://www.elektrodistribucija.rs/planirana-iskljucenja-srbija/Kraljevo_Dan_1_Iskljucenja.htm",
+            "rows": 46,
+            "matched_rows": 2
+          },
+          {
+            "date": "2026-10-16",
+            "url": "https://www.elektrodistribucija.rs/planirana-iskljucenja-srbija/Kraljevo_Dan_2_Iskljucenja.htm",
+            "rows": 27,
+            "matched_rows": 1
+          },
+          {
+            "date": "2026-10-17",
+            "url": "https://www.elektrodistribucija.rs/planirana-iskljucenja-srbija/Kraljevo_Dan_3_Iskljucenja.htm",
+            "rows": 1,
+            "matched_rows": 0
+          }
+        ],
+        "validated_coverage_at_fetch": {
+          "coverage_start": "2026-10-14",
+          "coverage_end": "2026-10-17",
+          "coverage_days": 4,
+          "coverage_complete": true,
+          "ignored_past_dates": []
+        }
+      },
+      "kinds": [
+        "eds_outage"
+      ]
+    },
+    {
+      "provider": "jkp",
+      "available": true,
+      "count": 8,
+      "items_count": 8,
+      "error": null,
+      "coverage_end": null,
+      "http": {
+        "http": [
+          {
+            "url": "https://www.jkpbukulja.rs/vesti/rekonstrukcija-magistralnog-cevovoda-od-tomica-kose-do-zabrezja",
+            "status": 200,
+            "bytes": 195382,
+            "content_type": "text/html",
+            "charset": "utf-8",
+            "duration_ms": 365
+          },
+          {
+            "url": "https://www.jkpbukulja.rs/vesti/nastavak-radova-na-vodovodnim-shahtama-u-selu-tulezi",
+            "status": 200,
+            "bytes": 190271,
+            "content_type": "text/html",
+            "charset": "utf-8",
+            "duration_ms": 230
+          },
+          {
+            "url": "https://www.jkpbukulja.rs/vesti/nastavljaju-se-radovi-na-izgradnji-cevovoda-u-garashima",
+            "status": 200,
+            "bytes": 192062,
+            "content_type": "text/html",
+            "charset": "utf-8",
+            "duration_ms": 426
+          },
+          {
+            "url": "https://www.jkpbukulja.rs/vesti/u-bukuljskoj-ulici-nakon-rekonstrukcije-dela-vodovodne-linije",
+            "status": 200,
+            "bytes": 193087,
+            "content_type": "text/html",
+            "charset": "utf-8",
+            "duration_ms": 187
+          },
+          {
+            "url": "https://www.jkpbukulja.rs/vesti/nakon-uspeshno-izvedenih-radova-rj-vodovod-i-kanalizacija-na-sanaciji-kvarova-na",
+            "status": 200,
+            "bytes": 195674,
+            "content_type": "text/html",
+            "charset": "utf-8",
+            "duration_ms": 255
+          },
+          {
+            "url": "https://www.jkpbukulja.rs/vesti/sanacija-dva-velika-kvara-na-magistralnom-cevovodu",
+            "status": 200,
+            "bytes": 195504,
+            "content_type": "text/html",
+            "charset": "utf-8",
+            "duration_ms": 223
+          },
+          {
+            "url": "https://www.jkpbukulja.rs/vesti/studenti-u-poseti-postrojenju-za-prechishcavanje-otpadnih-voda-u-banji",
+            "status": 200,
+            "bytes": 193091,
+            "content_type": "text/html",
+            "charset": "utf-8",
+            "duration_ms": 14568
+          },
+          {
+            "url": "https://www.jkpbukulja.rs/vesti/rj-vik-zidanje-vodovodnih-shahti-u-shvabica-kraju",
+            "status": 200,
+            "bytes": 190007,
+            "content_type": "text/html",
+            "charset": "utf-8",
+            "duration_ms": 14588
+          }
+        ],
+        "cached_articles": 8,
+        "source": "jkp"
+      },
+      "kinds": [
+        "water_info",
+        "water_outage",
+        "water_unknown"
+      ]
+    },
+    {
+      "provider": "putevi",
+      "available": true,
+      "count": 1,
+      "items_count": 1,
+      "error": null,
+      "coverage_end": null,
+      "http": {
+        "http": [
+          {
+            "url": "https://www.putevi-srbije.rs/stanje/novamapa/textfile.txt",
+            "status": 200,
+            "bytes": 100946,
+            "content_type": "text/plain",
+            "charset": "UTF-8",
+            "duration_ms": 14217
+          }
+        ],
+        "cached_articles": 0,
+        "source": "putevi"
+      },
+      "kinds": [
+        "closure"
+      ]
+    },
+    {
+      "provider": "opstina",
+      "available": true,
+      "count": 3,
+      "items_count": 3,
+      "error": null,
+      "coverage_end": null,
+      "http": {
+        "http": [
+          {
+            "url": "https://arandjelovac.rs/wp-json/wp/v2/posts",
+            "status": 200,
+            "bytes": 184542,
+            "content_type": "application/json",
+            "charset": "UTF-8",
+            "duration_ms": 13164
+          }
+        ],
+        "cached_articles": 0,
+        "source": "opstina"
+      },
+      "kinds": [
+        "news"
+      ]
+    },
+    {
+      "provider": "kultura",
+      "available": true,
+      "count": 9,
+      "items_count": 9,
+      "error": null,
+      "coverage_end": null,
+      "http": {
+        "http": [
+          {
+            "url": "https://centarzakulturuarandjelovac.rs/rss",
+            "status": 200,
+            "bytes": 9186,
+            "content_type": "application/rss+xml",
+            "charset": "utf-8",
+            "duration_ms": 14583
+          }
+        ],
+        "cached_articles": 0,
+        "source": "kultura"
+      },
+      "kinds": [
+        "announcement",
+        "event"
+      ]
+    },
+    {
+      "provider": "tourism",
+      "available": true,
+      "count": 1,
+      "items_count": 1,
+      "error": null,
+      "coverage_end": null,
+      "http": {
+        "http": [
+          {
+            "url": "https://bukovickabanja.rs/category/vesti/feed/",
+            "status": 200,
+            "bytes": 46451,
+            "content_type": "application/rss+xml",
+            "charset": "UTF-8",
+            "duration_ms": 14590
+          }
+        ],
+        "cached_articles": 0,
+        "source": "tourism"
+      },
+      "kinds": [
+        "announcement"
+      ]
+    }
+  ]
+}

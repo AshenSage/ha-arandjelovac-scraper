@@ -1,0 +1,58 @@
+{
+  "title": "Aranđelovac Live",
+  "config": {
+    "step": {
+      "user": {
+        "title": "Aranđelovac Live",
+        "description": "Set up all six sources or one source. Each source gets an independent entry. The dashboard card loads automatically.",
+        "data": {
+          "provider": "Source"
+        }
+      }
+    },
+    "abort": {
+      "already_configured": "The selected sources are already configured.",
+      "invalid_provider": "Unknown source."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Configure source",
+        "description": "EDS uses validated coverage. For notices, the period is a display filter, not a confirmation of supply.",
+        "data": {
+          "lookback_days": "Notice lookback days",
+          "horizon_days": "Event horizon days",
+          "areas": "Places, comma-separated",
+          "categories": "Municipal categories (47 = news)"
+        }
+      }
+    },
+    "error": {
+      "invalid_range": "Value outside the allowed range.",
+      "invalid_categories": "Use comma-separated numeric categories."
+    }
+  },
+  "entity": {
+    "sensor": {
+      "eds_outages": {
+        "name": "Scheduled power outages"
+      },
+      "jkp_water": {
+        "name": "Water notices"
+      },
+      "putevi_traffic": {
+        "name": "Traffic notices"
+      },
+      "opstina_news": {
+        "name": "Municipal news"
+      },
+      "kultura_events": {
+        "name": "Cultural events"
+      },
+      "tourism_events": {
+        "name": "Tourism notices"
+      }
+    }
+  }
+}

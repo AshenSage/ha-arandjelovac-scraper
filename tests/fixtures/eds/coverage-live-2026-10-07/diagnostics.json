@@ -1,0 +1,95 @@
+{
+  "requests": [
+    {
+      "url": "https://www.elektrodistribucija.rs/planirana-iskljucenja/planirana-kv",
+      "status": 200,
+      "bytes": 48448,
+      "content_type": "text/html",
+      "charset": "utf-8",
+      "duration_ms": 10290
+    },
+    {
+      "url": "https://www.elektrodistribucija.rs/planirana-iskljucenja-srbija/Kraljevo_Dan_0_Iskljucenja.htm",
+      "status": 200,
+      "bytes": 26285,
+      "content_type": "text/html",
+      "charset": null,
+      "duration_ms": 343
+    },
+    {
+      "url": "https://www.elektrodistribucija.rs/planirana-iskljucenja-srbija/Kraljevo_Dan_2_Iskljucenja.htm",
+      "status": 200,
+      "bytes": 16039,
+      "content_type": "text/html",
+      "charset": null,
+      "duration_ms": 293
+    },
+    {
+      "url": "https://www.elektrodistribucija.rs/planirana-iskljucenja-srbija/Kraljevo_Dan_3_Iskljucenja.htm",
+      "status": 200,
+      "bytes": 3287,
+      "content_type": "text/html",
+      "charset": null,
+      "duration_ms": 286
+    },
+    {
+      "url": "https://www.elektrodistribucija.rs/planirana-iskljucenja-srbija/Kraljevo_Dan_1_Iskljucenja.htm",
+      "status": 200,
+      "bytes": 16834,
+      "content_type": "text/html",
+      "charset": null,
+      "duration_ms": 10090
+    }
+  ],
+  "discovered_pages": [
+    {
+      "slot": 0,
+      "url": "https://www.elektrodistribucija.rs/planirana-iskljucenja-srbija/Kraljevo_Dan_0_Iskljucenja.htm"
+    },
+    {
+      "slot": 1,
+      "url": "https://www.elektrodistribucija.rs/planirana-iskljucenja-srbija/Kraljevo_Dan_1_Iskljucenja.htm"
+    },
+    {
+      "slot": 2,
+      "url": "https://www.elektrodistribucija.rs/planirana-iskljucenja-srbija/Kraljevo_Dan_2_Iskljucenja.htm"
+    },
+    {
+      "slot": 3,
+      "url": "https://www.elektrodistribucija.rs/planirana-iskljucenja-srbija/Kraljevo_Dan_3_Iskljucenja.htm"
+    }
+  ],
+  "parsed_pages": [
+    {
+      "date": "2026-10-07",
+      "url": "https://www.elektrodistribucija.rs/planirana-iskljucenja-srbija/Kraljevo_Dan_0_Iskljucenja.htm",
+      "rows": 29,
+      "matched_rows": 0
+    },
+    {
+      "date": "2026-10-08",
+      "url": "https://www.elektrodistribucija.rs/planirana-iskljucenja-srbija/Kraljevo_Dan_1_Iskljucenja.htm",
+      "rows": 18,
+      "matched_rows": 0
+    },
+    {
+      "date": "2026-10-09",
+      "url": "https://www.elektrodistribucija.rs/planirana-iskljucenja-srbija/Kraljevo_Dan_2_Iskljucenja.htm",
+      "rows": 17,
+      "matched_rows": 0
+    },
+    {
+      "date": "2026-10-10",
+      "url": "https://www.elektrodistribucija.rs/planirana-iskljucenja-srbija/Kraljevo_Dan_3_Iskljucenja.htm",
+      "rows": 2,
+      "matched_rows": 0
+    }
+  ],
+  "validated_coverage_at_fetch": {
+    "coverage_start": "2026-10-07",
+    "coverage_end": "2026-10-10",
+    "coverage_days": 4,
+    "coverage_complete": true,
+    "ignored_past_dates": []
+  }
+}

@@ -1,0 +1,1 @@
+Die Quellenstruktur vom 14.10.2026 wird mit reduzierten synthetischen HTML-/RSS-/JSON-/TSV-Beispielen in tests/test_notices.py geprüft. Originalantworten neuer Artikel werden nicht im öffentlichen Repository abgelegt. Die EDS-Fixtures stammen aus dem bestehenden, vom Nutzer bereitgestellten Paket.

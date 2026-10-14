@@ -1,0 +1,58 @@
+{
+  "title": "Aranđelovac Live",
+  "config": {
+    "step": {
+      "user": {
+        "title": "Aranđelovac Live",
+        "description": "Richtet alle sechs Quellen oder eine einzelne Quelle ein. Jede Quelle erhält einen eigenen Eintrag. Die Dashboardkarte wird automatisch geladen.",
+        "data": {
+          "provider": "Quelle"
+        }
+      }
+    },
+    "abort": {
+      "already_configured": "Die gewählten Quellen sind bereits eingerichtet.",
+      "invalid_provider": "Unbekannte Quelle."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Quelle konfigurieren",
+        "description": "EDS verwendet seinen geprüften Datumsbereich. Bei Meldungen ist der Zeitraum ein Anzeigefilter, keine Bestätigung der Versorgung.",
+        "data": {
+          "lookback_days": "Meldungen der letzten Tage",
+          "horizon_days": "Veranstaltungen der nächsten Tage",
+          "areas": "Orte, mit Komma getrennt",
+          "categories": "Gemeindekategorien (47 = Neuigkeiten)"
+        }
+      }
+    },
+    "error": {
+      "invalid_range": "Wert ausserhalb des erlaubten Bereichs.",
+      "invalid_categories": "Kategorien als Zahlen, mit Komma getrennt."
+    }
+  },
+  "entity": {
+    "sensor": {
+      "eds_outages": {
+        "name": "Geplante Stromabschaltungen"
+      },
+      "jkp_water": {
+        "name": "Wassermeldungen"
+      },
+      "putevi_traffic": {
+        "name": "Verkehrsmeldungen"
+      },
+      "opstina_news": {
+        "name": "Gemeindemeldungen"
+      },
+      "kultura_events": {
+        "name": "Kulturveranstaltungen"
+      },
+      "tourism_events": {
+        "name": "Tourismusmeldungen"
+      }
+    }
+  }
+}

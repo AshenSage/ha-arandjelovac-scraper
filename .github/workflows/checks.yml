@@ -1,0 +1,82 @@
+name: Tests and stable release
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: checks-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  python:
+    name: Parser and transport regression tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.14'
+      - run: python -m pip install aiohttp
+      - run: python -m unittest discover -s tests -v
+      - run: python -m compileall -q custom_components
+      - run: python tools/validate_package.py
+  homeassistant:
+    name: Home Assistant 2026.10.1 runtime
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.14'
+      - run: python -m pip install -r requirements-test.txt
+      - run: python -m pytest tests/ha -q
+  frontend:
+    name: Chromium card tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - run: npx playwright install --with-deps chromium --only-shell
+      - run: npm test
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: card-browser-results
+          path: test-results/
+          if-no-files-found: ignore
+  hacs:
+    name: Official HACS repository validation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: hacs/action@main
+        with:
+          category: integration
+          comment: false
+          ignore: description topics
+  release:
+    name: Publish stable version after successful checks
+    needs: [python, homeassistant, frontend, hacs]
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Package and publish once per version
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          VERSION=$(python -c "import json; print(json.load(open('custom_components/arandjelovac_live/manifest.json'))['version'])")
+          python tools/package_release.py
+          if gh release view "v$VERSION" >/dev/null 2>&1; then
+            echo "Stable release v$VERSION already exists."
+          else
+            gh release create "v$VERSION" "release/arandjelovac_live.zip" --target "$GITHUB_SHA" --title "Aranđelovac Live $VERSION" --notes-file docs/RELEASE_NOTES.md --latest
+          fi

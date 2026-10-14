@@ -1,0 +1,6 @@
+{
+  "name": "ha-arandjelovac-scraper-tests",
+  "private": true,
+  "scripts": {"test": "node tests/frontend/card.test.cjs"},
+  "devDependencies": {"playwright": "1.55.0"}
+}

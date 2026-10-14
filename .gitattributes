@@ -1,0 +1,2 @@
+# Preserve original EDS captures, including BOM and CRLF.
+tests/fixtures/** -text -whitespace

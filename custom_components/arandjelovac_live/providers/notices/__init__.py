@@ -1,0 +1,1 @@
+"""Public local notice providers."""

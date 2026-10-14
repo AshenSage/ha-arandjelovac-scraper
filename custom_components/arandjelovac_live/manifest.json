@@ -1,0 +1,17 @@
+{
+  "domain": "arandjelovac_live",
+  "name": "Aran\u0111elovac Live",
+  "version": "1.2.0",
+  "config_flow": true,
+  "documentation": "https://github.com/AshenSage/ha-arandjelovac-scraper",
+  "iot_class": "cloud_polling",
+  "integration_type": "service",
+  "requirements": [],
+  "codeowners": [
+    "@AshenSage"
+  ],
+  "issue_tracker": "https://github.com/AshenSage/ha-arandjelovac-scraper/issues",
+  "dependencies": [
+    "frontend"
+  ]
+}

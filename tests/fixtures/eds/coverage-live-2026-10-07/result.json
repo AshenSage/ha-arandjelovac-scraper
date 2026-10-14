@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "provider": "eds",
+  "available": true,
+  "count": 0,
+  "coverage_start": "2026-10-07",
+  "coverage_end": "2026-10-10",
+  "coverage_days": 4,
+  "coverage_complete": true,
+  "last_attempt": "2026-10-07T09:52:44.649836+02:00",
+  "last_success": "2026-10-07T09:52:44.649836+02:00",
+  "items": [],
+  "items_count": 0,
+  "items_truncated": false,
+  "metadata": {
+    "timezone": "Europe/Belgrade",
+    "municipality": "Aranđelovac",
+    "coverage_start": "2026-10-07",
+    "coverage_end": "2026-10-10"
+  },
+  "error": null
+}

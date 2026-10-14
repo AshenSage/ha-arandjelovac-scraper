@@ -1,0 +1,47 @@
+[
+  {
+    "file": "index.html",
+    "url": "https://www.elektrodistribucija.rs/planirana-iskljucenja/planirana-kv",
+    "at": "2026-10-07T09:52:34.552002+02:00",
+    "bytes": 48448,
+    "sha256": "215bc7dbe08db4665506f88ac5a85b3e64ed27625b4235b2c47204ee8230a6d5",
+    "content_type": "text/html",
+    "charset": "utf-8"
+  },
+  {
+    "file": "day0.html",
+    "url": "https://www.elektrodistribucija.rs/planirana-iskljucenja-srbija/Kraljevo_Dan_0_Iskljucenja.htm",
+    "at": "2026-10-07T09:52:34.901100+02:00",
+    "bytes": 26285,
+    "sha256": "12f335a12eb227c472642933eae5e4f477aafa81e40fb2f2c4d35413b8e6ffe1",
+    "content_type": "text/html",
+    "charset": null
+  },
+  {
+    "file": "day2.html",
+    "url": "https://www.elektrodistribucija.rs/planirana-iskljucenja-srbija/Kraljevo_Dan_2_Iskljucenja.htm",
+    "at": "2026-10-07T09:52:35.196639+02:00",
+    "bytes": 16039,
+    "sha256": "84319ce6ba170dff2da0ab79c70ec38249e05b0a1aa531afb3d20ee727489885",
+    "content_type": "text/html",
+    "charset": null
+  },
+  {
+    "file": "day3.html",
+    "url": "https://www.elektrodistribucija.rs/planirana-iskljucenja-srbija/Kraljevo_Dan_3_Iskljucenja.htm",
+    "at": "2026-10-07T09:52:35.485906+02:00",
+    "bytes": 3287,
+    "sha256": "6b5494fb821e8fc43047298efb1cc4aa115c81bc9851e8f372d6a9ccbcc8fe70",
+    "content_type": "text/html",
+    "charset": null
+  },
+  {
+    "file": "day1.html",
+    "url": "https://www.elektrodistribucija.rs/planirana-iskljucenja-srbija/Kraljevo_Dan_1_Iskljucenja.htm",
+    "at": "2026-10-07T09:52:44.647783+02:00",
+    "bytes": 16834,
+    "sha256": "19422cf361b174a252f50dc981fc9b8c8e7d5447fd5e017cad4abe1ed9465473",
+    "content_type": "text/html",
+    "charset": null
+  }
+]
