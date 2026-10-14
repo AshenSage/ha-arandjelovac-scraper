@@ -1,6 +1,11 @@
 {
   "name": "ha-arandjelovac-scraper-tests",
   "private": true,
-  "scripts": {"test": "node tests/frontend/card.test.cjs"},
-  "devDependencies": {"playwright": "1.55.0"}
+  "scripts": {
+    "test": "node tests/frontend/card.test.cjs"
+  },
+  "devDependencies": {
+    "@webcomponents/scoped-custom-element-registry": "0.0.10",
+    "playwright": "1.55.0"
+  }
 }

@@ -1,4 +1,4 @@
-# Prüfbericht · Aranđelovac Live 1.2.0
+# Prüfbericht · Aranđelovac Live 1.2.1
 
 Stand: 14.10.2026. Geprüftes Laufzeitziel: Home Assistant Core 2026.10.1, Python 3.14.2.
 
@@ -10,7 +10,7 @@ Stand: 14.10.2026. Geprüftes Laufzeitziel: Home Assistant Core 2026.10.1, Pytho
 | Zusätzliche Quellen-, Datums-, Status- und Budgetprüfungen | 44 Tests erfolgreich |
 | Gesamte Offline-Python-Suite | 153 Tests erfolgreich |
 | Reale HA-Core-Tests | 12 Tests erfolgreich |
-| Chromium-Karte | 79 Assertions erfolgreich, keine JavaScript-Fehler |
+| Chromium-Karte | 88 Assertions erfolgreich, keine JavaScript-Fehler |
 | Bildschirmbreiten | 320, 440 und 736 px, jeweils helles und dunkles Theme |
 | Struktur/Syntax | Python compileall, JavaScript node --check, JSON, Versionsabgleich und Paketstruktur erfolgreich |
 | Live-Quellen | Alle sechs Provider verfügbar; Details in live-verification.json |
@@ -30,6 +30,8 @@ Der echte Laufzeittest zeigte, dass HA bei unavailable normale Extra-Attribute a
 Getestet mit Chromium: Darstellung in zwei Themes und drei Breiten, aufklappbare Bereiche, Erhalt geöffneter Kacheln bei Zustandsupdates, der Titel Veranstaltungen & News, Quellenzählung, Quellenausfall, Diagnose bei fehlenden Hauptsensorattributen und Escaping fremder Texte/URLs. Bei keiner geprüften Breite tritt horizontales Überlaufen auf.
 
 Im isolierten Browser sind HA-eigene Icons Platzhalter; im laufenden HA stellt ha-icon die Symbole bereit. Die Karte selbst benötigt keine externen JavaScript-Bibliotheken.
+
+Für 1.2.1 wurde der Startup-Fehler mit der echten `@webcomponents/scoped-custom-element-registry`-Polyfill-Version 0.0.10 reproduziert: Die unveränderte 1.2.0-Karte ist nach dem Registry-Wechsel nicht mehr über `customElements.get` auffindbar. Der neue Regressionstest scheitert damit beim Warten auf die Karte. Mit der Korrektur bestehen drei Ladereihenfolgen (vor dem Polyfill, nach dem Polyfill vor dem HA-Element, nach dem HA-Element), Konstruktion gegen die aktive HTMLElement-Klasse und doppeltes Laden als Modul/Ressource. Die 88 Assertions beinhalten diese neun neuen Prüfungen. Die Polyfill-Abhängigkeit wird ausschliesslich im Browsertest verwendet, nicht im ausgelieferten Kartenmodul.
 
 ## Nach Installation noch ausstehend
 

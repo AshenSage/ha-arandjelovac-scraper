@@ -1,4 +1,9 @@
-/* Aranđelovac Live 1.2.0 — self-contained HA card, no browser-side scraping. */
+/* Aranđelovac Live 1.2.1 — self-contained HA card, no browser-side scraping. */
+// HA's scoped-registry polyfill replaces both customElements and HTMLElement.
+// Wait before creating the class, not just before defining its tag. A native
+// whenDefined promise also resolves when HA registers its polyfill stand-in.
+// See home-assistant/frontend#53890. Scope everything for duplicate resources.
+customElements.whenDefined('home-assistant').then(() => {
 const PROVIDERS = {
   eds: {name:'EDS · Strom',icon:'mdi:lightning-bolt',title:'Strom',url:'https://www.elektrodistribucija.rs/planirana-iskljucenja/planirana-kv'},
   jkp: {name:'JKP Bukulja · Wasser',icon:'mdi:water',title:'Wasser',url:'https://www.jkpbukulja.rs/vesti'},
@@ -129,3 +134,4 @@ class ArandjelovacLiveCard extends HTMLElement {
 if(!customElements.get('arandjelovac-live-card'))customElements.define('arandjelovac-live-card',ArandjelovacLiveCard);
 window.customCards=window.customCards||[];
 if(!window.customCards.some(c=>c.type==='arandjelovac-live-card'))window.customCards.push({type:'arandjelovac-live-card',name:'Aranđelovac Live',description:'Strom, Wasser, Verkehr, Veranstaltungen & News',preview:true});
+}).catch(error=>console.error('Aranđelovac Live: Karte konnte nicht registriert werden.',error));

@@ -1,4 +1,11 @@
-# Aranđelovac Live 1.2.0
+# Aranđelovac Live 1.2.1
+
+- Behebt eine mögliche Ursache von **Custom element not found**: Die Karte wartet mit Klassenerstellung und Registrierung, bis Home Assistants Elementregistrierung bereit ist.
+- Automatische Frontendmodule und zusätzlich eingetragene Dashboard-Ressourcen können dieselbe Datei ohne doppelte Registrierung laden.
+- Neue Browserregressionen prüfen drei Ladereihenfolgen mit der echten HA-Polyfill-Version 0.0.10; die bestehende Oberfläche bleibt erhalten.
+- Nach dem Update HA neu starten und die Seite beziehungsweise App neu laden. Die bestehende Karten-YAML bleibt gültig.
+
+## Komplettpaket seit 1.2.0
 
 Komplettpaket für Strom, Wasser, Verkehr, Gemeindemeldungen sowie Kultur und Tourismus. Aufklappbare, HA-Theme-kompatible Smartphone-Karte mit **Veranstaltungen & News** und getrenntem Quellenstatus.
 
