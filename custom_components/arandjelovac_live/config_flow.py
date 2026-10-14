@@ -8,7 +8,7 @@ from homeassistant.config_entries import ConfigFlowResult
 from homeassistant.core import callback
 
 from .const import DOMAIN
-from .providers.notices.provider import SOURCES
+from .providers.notices.provider import SOURCES,EVENT_PROVIDERS
 
 PROVIDERS={'eds':'EDS · Strom',**{key:value['title'] for key,value in SOURCES.items()}}
 
@@ -26,7 +26,7 @@ class ArandjelovacLiveFlow(config_entries.ConfigFlow,domain=DOMAIN):
     async def async_step_user(self,user_input: dict[str,Any] | None=None) -> ConfigFlowResult:
         if user_input is None:
             return self.async_show_form(step_id='user',data_schema=vol.Schema({
-                vol.Required('provider',default='all'):vol.In({'all':'Komplettpaket · alle 6 Quellen',**PROVIDERS})
+                vol.Required('provider',default='all'):vol.In({'all':f'Komplettpaket · alle {len(PROVIDERS)} Quellen',**PROVIDERS})
             }))
         provider=user_input.get('provider','all')
         if provider!='all':return await self._create_provider(provider)
@@ -60,8 +60,8 @@ class ArandjelovacOptionsFlow(config_entries.OptionsFlow):
         else:errors={}
         options=self.config_entry.options;provider=self.config_entry.data['provider']
         fields={}
-        if provider not in ('eds','putevi'):fields[vol.Optional('lookback_days',default=options.get('lookback_days',30))]=vol.All(vol.Coerce(int),vol.Range(min=1,max=90))
-        if provider in ('kultura','tourism'):fields[vol.Optional('horizon_days',default=options.get('horizon_days',60))]=vol.All(vol.Coerce(int),vol.Range(min=1,max=180))
+        if provider not in ('eds','putevi','manifestations'):fields[vol.Optional('lookback_days',default=options.get('lookback_days',30))]=vol.All(vol.Coerce(int),vol.Range(min=1,max=90))
+        if provider in EVENT_PROVIDERS and provider!='manifestations':fields[vol.Optional('horizon_days',default=options.get('horizon_days',60))]=vol.All(vol.Coerce(int),vol.Range(min=1,max=180))
         if provider=='putevi':fields[vol.Optional('areas',default=options.get('areas','Aranđelovac, Darosava, Ranilović'))]=str
         if provider=='opstina':fields[vol.Optional('categories',default=options.get('categories','47'))]=str
         return self.async_show_form(step_id='init',data_schema=vol.Schema(fields),errors=errors)

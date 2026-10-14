@@ -8,7 +8,7 @@ import unittest
 import bootstrap
 from live_test.common.models import FetchResult, SourceError, SourceState, validate_projection
 from live_test.providers.notices.parsers import (Article,event_items,item,matches_area,parse_bukulja_article,
-    parse_bukulja_index,parse_feed,parse_municipality,parse_traffic,water_notice)
+    parse_bukulja_index,parse_feed,parse_manifestations,parse_municipality,parse_traffic,water_notice)
 from live_test.providers.notices.provider import NoticeProvider,NoticeSnapshot,SOURCES
 from live_test.providers.notices.text import TZ,local_time,named_date,normalize,plain,public_link
 
@@ -139,6 +139,29 @@ class TrafficTests(unittest.TestCase):
         self.assertIsNone(parse_traffic(HEADER+row,'https://www.putevi-srbije.rs/stanje/novamapa/textfile.txt',NOW)[0]['end_at'])
 
 class EventTests(unittest.TestCase):
+    def test_deadline_in_heading_is_not_a_calendar_event(self):
+        row=event_items(article(title='Konkurs za prijave do 2.11.2026.'))[0]
+        self.assertEqual(row['kind'],'announcement');self.assertNotIn('event_date',row)
+    def test_trilogy_presentation_is_a_reading(self):
+        row=event_items(article(title='Представљање завршног дела трилогије Бреме',text='15. октобра 2026. од 19 сати'))[0]
+        self.assertEqual(row['event_type'],'reading')
+        self.assertEqual(row['start_at'],'2026-10-15T19:00:00+02:00')
+    def test_numeric_date_only_does_not_invent_midnight(self):
+        row=event_items(article(title='Svetski dan turizma 27.09.2026.',image_only=True,text=''))[0]
+        self.assertEqual(row['event_date'],'2026-09-27');self.assertIsNone(row['start_at'])
+        self.assertEqual(row['status'],'date_only')
+    def test_named_date_without_time_is_kept_as_date_only(self):
+        row=event_items(article(title='Koncert 2. novembra 2026.'))[0]
+        self.assertEqual(row['event_date'],'2026-11-02');self.assertIsNone(row['start_at'])
+    def test_calendar_reference_is_not_a_confirmed_year(self):
+        raw='<h2>novogodišnji bazar<br>decembar</h2><a href="/bazar/">detaljnije</a><h2>festival</h2><a href="/festival/">detaljnije</a>'
+        rows=parse_manifestations(raw,'https://bukovickabanja.rs/manifestacije/')
+        self.assertEqual(len(rows),2);self.assertEqual(rows[0]['season_label'],'decembar')
+        self.assertFalse(rows[0]['date_confirmed']);self.assertIsNone(rows[0]['published_at'])
+        self.assertIsNone(rows[0]['start_at']);self.assertNotIn('event_date',rows[0])
+    def test_missing_or_foreign_calendar_links_fail(self):
+        for raw in ['<h2>Keine Veranstaltungen</h2>','<h2>Basar</h2><a href="https://evil.test/">detaljnije</a>']:
+            with self.subTest(raw=raw),self.assertRaises(SourceError):parse_manifestations(raw,'https://bukovickabanja.rs/manifestacije/')
     def test_split_program_has_individual_titles_and_original_link(self):
         source=article(title='Филмски програм',text='14.10.\n18:00 – Film A\n20:00 - Film B')
         rows=event_items(source)
@@ -174,6 +197,21 @@ class EventTests(unittest.TestCase):
 
 class ProjectionTests(unittest.TestCase):
     def provider(self,key='jkp',**options):return NoticeProvider(key,None,options=options,clock=lambda:NOW)
+    def test_non_cinema_announcements_survive_full_programme(self):
+        movies=tuple(item(replace(article(),id=f'film-{i}'),'event',event_type='cinema',start_at=(NOW+timedelta(hours=i+1)).isoformat()) for i in range(30))
+        festival=item(replace(article(),id='festival',title='Pozorisni festival'),'announcement')
+        value=self.provider('kultura').project(NoticeSnapshot((*movies,festival),{}),NOW)
+        self.assertEqual(value.count,31);self.assertTrue(value.truncated)
+        self.assertEqual(value.items[0]['id'],'festival')
+    def test_date_only_past_removed_and_future_kept(self):
+        rows=tuple(event_items(article(title=title))[0] for title in ['Koncert 27.09.2026.','Koncert 14.10.2026.','Koncert 2.11.2026.'])
+        value=self.provider('library').project(NoticeSnapshot(rows,{}),NOW)
+        self.assertEqual([r['event_date'] for r in value.items],['2026-10-14','2026-11-02'])
+    def test_seasons_remain_undated_outside_news_lookback(self):
+        rows=parse_manifestations('<h2>Bazar<br>decembar</h2><a href="/bazar/">detaljnije</a>','https://bukovickabanja.rs/manifestacije/')
+        value=self.provider('manifestations').project(NoticeSnapshot(rows,{}),NOW)
+        self.assertEqual(value.count,1);self.assertFalse(value.items[0]['date_confirmed'])
+        validate_projection(value,self.provider('manifestations').spec)
     def test_unknown_old_water_notice_is_historical(self):
         row=water_notice(replace(article(text='Prekid vodosnabdevanja'),published=NOW-timedelta(days=7)))
         value=self.provider().project(NoticeSnapshot((row,),{}),NOW)

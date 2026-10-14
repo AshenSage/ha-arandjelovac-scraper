@@ -36,7 +36,7 @@ async def test_complete_package_creates_independent_entries(hass):
         await hass.async_block_till_done()
     assert result['type']=='create_entry'
     entries=hass.config_entries.async_entries(DOMAIN)
-    assert len(entries)==6
+    assert len(entries)==len(PROVIDERS)
     assert {e.unique_id for e in entries}=={f'{p}:arandjelovac' for p in PROVIDERS}
     again=await hass.config_entries.flow.async_init(DOMAIN,context={'source':config_entries.SOURCE_USER})
     again=await hass.config_entries.flow.async_configure(again['flow_id'],{'provider':'all'})
@@ -62,8 +62,23 @@ async def test_missing_sources_can_complete_existing_eds(hass):
         result=await hass.config_entries.flow.async_init(DOMAIN,context={'source':config_entries.SOURCE_USER})
         result=await hass.config_entries.flow.async_configure(result['flow_id'],{'provider':'all'})
         await hass.async_block_till_done()
-    assert len(hass.config_entries.async_entries(DOMAIN))==6
+    assert len(hass.config_entries.async_entries(DOMAIN))==len(PROVIDERS)
     assert hass.config_entries.async_get_entry(entry.entry_id) is entry
+
+
+async def test_upgrade_adds_only_three_new_sources_to_existing_six(hass):
+    old=[]
+    for key in ['eds','jkp','putevi','opstina','kultura','tourism']:
+        entry=MockConfigEntry(domain=DOMAIN,unique_id=f'{key}:arandjelovac',data={'provider':key,'location':'arandjelovac'})
+        entry.add_to_hass(hass);old.append(entry)
+    with patch('custom_components.arandjelovac_live.async_setup_entry',return_value=True):
+        result=await hass.config_entries.flow.async_init(DOMAIN,context={'source':config_entries.SOURCE_USER})
+        await hass.config_entries.flow.async_configure(result['flow_id'],{'provider':'all'})
+        await hass.async_block_till_done()
+    entries=hass.config_entries.async_entries(DOMAIN)
+    assert len(entries)==9
+    assert {e.data['provider'] for e in entries}-{e.data['provider'] for e in old}=={'museum','library','manifestations'}
+    assert all(hass.config_entries.async_get_entry(e.entry_id) is e for e in old)
 
 
 async def test_sensor_lifecycle_and_failed_source_isolation(hass):
@@ -133,6 +148,8 @@ async def test_all_sources_real_setup_http_card_and_independence(hass,freezer,ha
         if url=='https://www.jkpbukulja.rs/vesti':
             return '<h1>Вести</h1><a href="/vesti/primer"><span>6. октобар 2026.</span><h2>Radovi na vodovodu</h2></a>'
         if '/vesti/primer' in url:return '<h1>Radovi na vodovodu</h1><div class="page-content"><p>Informacija o cevovodu.</p></div>'
+        if url.endswith('/manifestacije/'):
+            return '<h2>Novogodisnji bazar<br>decembar</h2><a href="/bazar/">detaljnije</a>'
         if '/wp-json/' in url:return '[]'
         if url.endswith('textfile.txt'):return 'point\ttitle\tdescription\ticonSize\ticonOffset\ticon\n'
         return '<rss><channel><title>News</title><link>https://example.test/</link></channel></rss>'
@@ -141,12 +158,12 @@ async def test_all_sources_real_setup_http_card_and_independence(hass,freezer,ha
         result=await hass.config_entries.flow.async_configure(start['flow_id'],{'provider':'all'})
         await hass.async_block_till_done()
         entries=hass.config_entries.async_entries(DOMAIN)
-        assert len(entries)==6
+        assert len(entries)==len(PROVIDERS)
         assert all(entry.state is ConfigEntryState.LOADED for entry in entries)
         coordinators={e.data['provider']:e.runtime_data for e in entries}
-        assert len({id(c) for c in coordinators.values()})==6
+        assert len({id(c) for c in coordinators.values()})==len(PROVIDERS)
         assert hass.states.get('sensor.arandjelovac_eds_outages').state=='1'
-        assert len([s for s in hass.states.async_all('sensor') if s.attributes.get('integration_domain')==DOMAIN])==12
+        assert len([s for s in hass.states.async_all('sensor') if s.attributes.get('integration_domain')==DOMAIN])==2*len(PROVIDERS)
         client=await hass_client()
         response=await client.get('/arandjelovac_live/arandjelovac-live-card.js')
         assert response.status==200

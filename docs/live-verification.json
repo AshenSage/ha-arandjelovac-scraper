@@ -1,5 +1,5 @@
 {
-  "checked_at": "2026-10-14T15:57:39.905248+02:00",
+  "checked_at": "2026-10-14T17:48:03.000776+02:00",
   "sources": [
     {
       "provider": "eds",
@@ -16,7 +16,7 @@
             "bytes": 48448,
             "content_type": "text/html",
             "charset": "utf-8",
-            "duration_ms": 13699
+            "duration_ms": 6830
           },
           {
             "url": "https://www.elektrodistribucija.rs/planirana-iskljucenja-srbija/Kraljevo_Dan_0_Iskljucenja.htm",
@@ -24,7 +24,7 @@
             "bytes": 31549,
             "content_type": "text/html",
             "charset": null,
-            "duration_ms": 731
+            "duration_ms": 238
           },
           {
             "url": "https://www.elektrodistribucija.rs/planirana-iskljucenja-srbija/Kraljevo_Dan_2_Iskljucenja.htm",
@@ -32,7 +32,7 @@
             "bytes": 24356,
             "content_type": "text/html",
             "charset": null,
-            "duration_ms": 264
+            "duration_ms": 227
           },
           {
             "url": "https://www.elektrodistribucija.rs/planirana-iskljucenja-srbija/Kraljevo_Dan_3_Iskljucenja.htm",
@@ -40,7 +40,7 @@
             "bytes": 2280,
             "content_type": "text/html",
             "charset": null,
-            "duration_ms": 199
+            "duration_ms": 252
           },
           {
             "url": "https://www.elektrodistribucija.rs/planirana-iskljucenja-srbija/Kraljevo_Dan_1_Iskljucenja.htm",
@@ -48,7 +48,7 @@
             "bytes": 40751,
             "content_type": "text/html",
             "charset": null,
-            "duration_ms": 13231
+            "duration_ms": 14123
           }
         ],
         "discovered_pages": [
@@ -122,7 +122,7 @@
             "bytes": 195382,
             "content_type": "text/html",
             "charset": "utf-8",
-            "duration_ms": 365
+            "duration_ms": 304
           },
           {
             "url": "https://www.jkpbukulja.rs/vesti/nastavak-radova-na-vodovodnim-shahtama-u-selu-tulezi",
@@ -130,15 +130,15 @@
             "bytes": 190271,
             "content_type": "text/html",
             "charset": "utf-8",
-            "duration_ms": 230
+            "duration_ms": 302
           },
           {
             "url": "https://www.jkpbukulja.rs/vesti/nastavljaju-se-radovi-na-izgradnji-cevovoda-u-garashima",
             "status": 200,
-            "bytes": 192062,
+            "bytes": 192105,
             "content_type": "text/html",
             "charset": "utf-8",
-            "duration_ms": 426
+            "duration_ms": 245
           },
           {
             "url": "https://www.jkpbukulja.rs/vesti/u-bukuljskoj-ulici-nakon-rekonstrukcije-dela-vodovodne-linije",
@@ -146,15 +146,15 @@
             "bytes": 193087,
             "content_type": "text/html",
             "charset": "utf-8",
-            "duration_ms": 187
+            "duration_ms": 232
           },
           {
             "url": "https://www.jkpbukulja.rs/vesti/nakon-uspeshno-izvedenih-radova-rj-vodovod-i-kanalizacija-na-sanaciji-kvarova-na",
             "status": 200,
-            "bytes": 195674,
+            "bytes": 195717,
             "content_type": "text/html",
             "charset": "utf-8",
-            "duration_ms": 255
+            "duration_ms": 244
           },
           {
             "url": "https://www.jkpbukulja.rs/vesti/sanacija-dva-velika-kvara-na-magistralnom-cevovodu",
@@ -162,23 +162,23 @@
             "bytes": 195504,
             "content_type": "text/html",
             "charset": "utf-8",
-            "duration_ms": 223
-          },
-          {
-            "url": "https://www.jkpbukulja.rs/vesti/studenti-u-poseti-postrojenju-za-prechishcavanje-otpadnih-voda-u-banji",
-            "status": 200,
-            "bytes": 193091,
-            "content_type": "text/html",
-            "charset": "utf-8",
-            "duration_ms": 14568
+            "duration_ms": 241
           },
           {
             "url": "https://www.jkpbukulja.rs/vesti/rj-vik-zidanje-vodovodnih-shahti-u-shvabica-kraju",
             "status": 200,
-            "bytes": 190007,
+            "bytes": 190050,
             "content_type": "text/html",
             "charset": "utf-8",
-            "duration_ms": 14588
+            "duration_ms": 12809
+          },
+          {
+            "url": "https://www.jkpbukulja.rs/vesti/studenti-u-poseti-postrojenju-za-prechishcavanje-otpadnih-voda-u-banji",
+            "status": 200,
+            "bytes": 194308,
+            "content_type": "text/html",
+            "charset": "utf-8",
+            "duration_ms": 12886
           }
         ],
         "cached_articles": 8,
@@ -202,10 +202,10 @@
           {
             "url": "https://www.putevi-srbije.rs/stanje/novamapa/textfile.txt",
             "status": 200,
-            "bytes": 100946,
+            "bytes": 100129,
             "content_type": "text/plain",
             "charset": "UTF-8",
-            "duration_ms": 14217
+            "duration_ms": 17174
           }
         ],
         "cached_articles": 0,
@@ -230,7 +230,7 @@
             "bytes": 184542,
             "content_type": "application/json",
             "charset": "UTF-8",
-            "duration_ms": 13164
+            "duration_ms": 18478
           }
         ],
         "cached_articles": 0,
@@ -255,7 +255,7 @@
             "bytes": 9186,
             "content_type": "application/rss+xml",
             "charset": "utf-8",
-            "duration_ms": 14583
+            "duration_ms": 17175
           }
         ],
         "cached_articles": 0,
@@ -269,8 +269,8 @@
     {
       "provider": "tourism",
       "available": true,
-      "count": 1,
-      "items_count": 1,
+      "count": 0,
+      "items_count": 0,
       "error": null,
       "coverage_end": null,
       "http": {
@@ -281,14 +281,85 @@
             "bytes": 46451,
             "content_type": "application/rss+xml",
             "charset": "UTF-8",
-            "duration_ms": 14590
+            "duration_ms": 18241
           }
         ],
         "cached_articles": 0,
         "source": "tourism"
       },
+      "kinds": []
+    },
+    {
+      "provider": "museum",
+      "available": true,
+      "count": 0,
+      "items_count": 0,
+      "error": null,
+      "coverage_end": null,
+      "http": {
+        "http": [
+          {
+            "url": "https://nmar.rs/feed/",
+            "status": 200,
+            "bytes": 90969,
+            "content_type": "application/rss+xml",
+            "charset": "UTF-8",
+            "duration_ms": 7288
+          }
+        ],
+        "cached_articles": 0,
+        "source": "museum"
+      },
+      "kinds": []
+    },
+    {
+      "provider": "library",
+      "available": true,
+      "count": 1,
+      "items_count": 1,
+      "error": null,
+      "coverage_end": null,
+      "http": {
+        "http": [
+          {
+            "url": "https://www.nbssa.rs/feed/",
+            "status": 200,
+            "bytes": 65834,
+            "content_type": "application/rss+xml",
+            "charset": "UTF-8",
+            "duration_ms": 17606
+          }
+        ],
+        "cached_articles": 0,
+        "source": "library"
+      },
       "kinds": [
-        "announcement"
+        "event"
+      ]
+    },
+    {
+      "provider": "manifestations",
+      "available": true,
+      "count": 13,
+      "items_count": 13,
+      "error": null,
+      "coverage_end": null,
+      "http": {
+        "http": [
+          {
+            "url": "https://bukovickabanja.rs/manifestacije/",
+            "status": 200,
+            "bytes": 107375,
+            "content_type": "text/html",
+            "charset": "UTF-8",
+            "duration_ms": 18056
+          }
+        ],
+        "cached_articles": 0,
+        "source": "manifestations"
+      },
+      "kinds": [
+        "seasonal"
       ]
     }
   ]

@@ -4,7 +4,7 @@
     "step": {
       "user": {
         "title": "Aranđelovac Live",
-        "description": "Set up all six sources or one source. Each source gets an independent entry. The dashboard card loads automatically.",
+        "description": "Set up all nine sources or one source. The complete package adds missing entries and preserves existing sources.",
         "data": {
           "provider": "Source"
         }
@@ -52,6 +52,15 @@
       },
       "tourism_events": {
         "name": "Tourism notices"
+      },
+      "museum_events": {
+        "name": "Museum programme"
+      },
+      "library_events": {
+        "name": "Library programme"
+      },
+      "manifestations_events": {
+        "name": "Festivals and markets"
       }
     }
   }

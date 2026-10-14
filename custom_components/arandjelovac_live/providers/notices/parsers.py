@@ -232,14 +232,65 @@ def matches_area(text: str, areas: tuple[str,...]) -> tuple[str,...]:
     return tuple(found)
 
 
+class ManifestationsParser(HTMLParser):
+    """Read published heading/detail-link pairs, without inventing a year."""
+    def __init__(self):
+        super().__init__(convert_charrefs=True)
+        self.heading=None;self.parts=[];self.pending=None;self.link=None;self.link_parts=[];self.records=[]
+    def handle_starttag(self,tag,attrs):
+        attrs=dict(attrs)
+        if tag=='h2':self.heading=True;self.parts=[];self.pending=None
+        elif tag=='br' and self.heading:self.parts.append('\n')
+        elif tag=='a' and self.pending:
+            self.link=attrs.get('href');self.link_parts=[]
+    def handle_data(self,data):
+        if self.heading:self.parts.append(data)
+        if self.link:self.link_parts.append(data)
+    def handle_endtag(self,tag):
+        if tag=='h2' and self.heading:
+            self.pending=[' '.join(line.split()) for line in ''.join(self.parts).splitlines() if line.strip()]
+            self.heading=False
+        elif tag=='a' and self.link:
+            if normalize(''.join(self.link_parts).strip())=='detaljnije':
+                self.records.append((self.pending,self.link));self.pending=None
+            self.link=None
+
+
+def parse_manifestations(raw: str,base: str) -> tuple[dict,...]:
+    parser=ManifestationsParser();parser.feed(raw)
+    if not parser.records:raise SourceError('calendar_structure','Veranstaltungsübersicht enthält keine erkennbaren Einträge.',scope='manifestations')
+    rows=[];seen=set()
+    for heading,link in parser.records:
+        if not heading:continue
+        url=public_link(link,base)
+        if url in seen:continue
+        seen.add(url)
+        rows.append({'id':'manifestations:'+sha256(url.encode()).hexdigest()[:20],
+                     'title':excerpt(heading[0],350),'description':'',
+                     'description_is_excerpt':True,'source_url':url,'published_at':None,
+                     'kind':'seasonal','status':'seasonal','start_at':None,'end_at':None,
+                     'season_label':excerpt(' · '.join(heading[1:]),180) or 'Zeitraum nicht angegeben',
+                     'date_confirmed':False})
+    if not rows or len(rows)>50:raise SourceError('calendar_structure','Unplausibler Umfang der Veranstaltungsübersicht.',scope='manifestations')
+    return tuple(rows)
+
+
+def numeric_event_date(text: str) -> datetime | None:
+    match=re.search(r'(?<!\d)(\d{1,2})\.\s*(\d{1,2})\.\s*(20\d{2})\.?(?!\d)',text)
+    return local_time(int(match[3]),int(match[2]),int(match[1])) if match else None
+
+
 def event_items(article: Article) -> tuple[dict,...]:
     # Classify only an explicit article heading/URL, not incidental body words.
     heading=normalize(article.title+' '+article.url)
     event_type=next((kind for kind,pattern in (
         ('cinema',r'filmski[-\s]+program|bioskop'),('theatre',r'pozoris|(?:^|[\s/-])predstava\b'),
-        ('concert',r'koncert'),('exhibition',r'izlozb'),
+        ('concert',r'koncert'),('exhibition',r'izlozb'),('reading',r'knjig|knjizev|roman|tribin|trilog'),
+        ('market',r'bazar|sajam|vasar'),('festival',r'festival|svecanost'),
     ) if re.search(pattern,heading)),None)
     extra={'event_type':event_type} if event_type else {}
+    if re.search(r'\b(?:konkurs|prijav\w*|rok)\b',normalize(article.title)):
+        return (item(article,'announcement',status='announcement',**extra),)
     lines=article.text.splitlines();day=None;events=[]
     for line in lines:
         dm=re.fullmatch(r'\s*(\d{1,2})\.(\d{1,2})\.(?:(20\d{2})\.?)?\s*',line)
@@ -253,11 +304,13 @@ def event_items(article: Article) -> tuple[dict,...]:
                                start_at=start.isoformat(),status='scheduled',date_inferred_year=True,**extra))
     if events:return tuple(events)
     # Prefer the title. A ticket-sale date in body text is not an event date.
-    day=named_date(article.title,article.published)
+    day=numeric_event_date(article.title) or named_date(article.title,article.published)
     time=clock_time(article.title)
-    if day is None and not re.search(r'prodaj|rezerv|ulaznic|karat',normalize(article.text)):
-        day=named_date(article.text,article.published);time=clock_time(article.text)
+    if day is None and not re.search(r'prodaj|rezerv|ulaznic|karat|prijav|konkurs|\brok\b',normalize(article.text)):
+        day=numeric_event_date(article.text) or named_date(article.text,article.published);time=clock_time(article.text)
     if day and time:
         start=local_time(day.year,day.month,day.day,*time)
         return (item(article,'event',start_at=start.isoformat(),status='scheduled',**extra),)
+    if day:
+        return (item(article,'event',event_date=day.date().isoformat(),status='date_only',**extra),)
     return (item(article,'announcement',status='image_only' if article.image_only else 'announcement',**extra),)

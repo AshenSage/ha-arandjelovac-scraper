@@ -11,7 +11,7 @@ from urllib.parse import urlencode
 from ...common.http import HttpClient
 from ...common.models import FetchResult, Projection, SourceError, SourceSpec, utcnow
 from .parsers import (Article, event_items, item, matches_area, parse_bukulja_article,
-                      parse_bukulja_index, parse_feed, parse_municipality, parse_traffic,
+                      parse_bukulja_index, parse_feed, parse_manifestations, parse_municipality, parse_traffic,
                       water_notice, water_related)
 from .text import TZ, parse_iso
 
@@ -26,6 +26,12 @@ SOURCES = {
                 'url':'https://centarzakulturuarandjelovac.rs/rss','minutes':120},
     'tourism': {'title':'Tourismus · Veranstaltungen','sensor':'arandjelovac_tourism_events','key':'tourism_events','icon':'mdi:calendar-star',
                 'url':'https://bukovickabanja.rs/category/vesti/feed/','minutes':180},
+    'museum': {'title':'Museum · Kulturprogramm','sensor':'arandjelovac_museum_events','key':'museum_events','icon':'mdi:bank',
+               'url':'https://nmar.rs/feed/','minutes':180},
+    'library': {'title':'Bibliothek · Lesungen','sensor':'arandjelovac_library_events','key':'library_events','icon':'mdi:bookshelf',
+                'url':'https://www.nbssa.rs/feed/','minutes':180},
+    'manifestations': {'title':'Feste & Basare · Tourismus','sensor':'arandjelovac_manifestations_events','key':'manifestations_events','icon':'mdi:calendar-month',
+                      'url':'https://bukovickabanja.rs/manifestacije/','minutes':360},
 }
 HOSTS = {
     'jkp':frozenset({'www.jkpbukulja.rs'}),
@@ -33,7 +39,11 @@ HOSTS = {
     'opstina':frozenset({'arandjelovac.rs'}),
     'kultura':frozenset({'centarzakulturuarandjelovac.rs'}),
     'tourism':frozenset({'bukovickabanja.rs'}),
+    'museum':frozenset({'nmar.rs'}),
+    'library':frozenset({'www.nbssa.rs'}),
+    'manifestations':frozenset({'bukovickabanja.rs'}),
 }
+EVENT_PROVIDERS=('kultura','tourism','museum','library','manifestations')
 HTML = frozenset({'text/html','application/xhtml+xml'})
 FEEDS = frozenset({'application/rss+xml','application/xml','text/xml'})
 DEFAULT_AREAS = ('Aranđelovac','Darosava','Ranilović')
@@ -75,7 +85,7 @@ class NoticeProvider:
             articles=await self._parse(parse_municipality,raw,self.spec.source_url)
             values=tuple(item(a,'news') for a in articles)
             metadata.update(categories=str(categories),window='Neueste 30 Veröffentlichungen der gewählten Kategorien')
-        elif provider in ('kultura','tourism'):
+        elif provider in ('kultura','tourism','museum','library'):
             raw=await self.http.get_text(self.spec.source_url,content_types=FEEDS)
             articles=await self._parse(parse_feed,raw,self.spec.source_url)
             collected=[]
@@ -84,6 +94,11 @@ class NoticeProvider:
             values=tuple(collected)
             metadata.update(window='Aktueller RSS-Ausschnitt; kein vollständiger Veranstaltungskalender',
                             feed_articles=len(articles))
+        elif provider=='manifestations':
+            raw=await self.http.get_text(self.spec.source_url,content_types=HTML)
+            values=await self._parse(parse_manifestations,raw,self.spec.source_url)
+            metadata.update(window='Allgemeine Veranstaltungsübersicht; keine bestätigten Termine für ein bestimmtes Jahr',
+                            date_confirmed=False)
         elif provider=='putevi':
             raw=await self.http.get_text(self.spec.source_url,content_types=frozenset({'text/plain'}))
             values=await self._parse(parse_traffic,raw,self.spec.source_url,now)
@@ -131,12 +146,19 @@ class NoticeProvider:
                 if not matched:continue
                 value['matched_areas']=list(matched)
                 if value.get('end_at') and parse_iso(value['end_at'])<=now:value['status']='deadline_passed'
+            elif kind=='manifestations':
+                # This source publishes seasons, not dated 2026/2027 events.
+                if value.get('kind')!='seasonal' or value.get('date_confirmed') is not False:
+                    raise SourceError('calendar_structure','Saisonhinweis ist nicht eindeutig gekennzeichnet.',scope=kind)
             else:
                 published=parse_iso(value['published_at'])
                 if published>now+timedelta(days=1):
                     raise SourceError('future_publication','Veröffentlichungsdatum liegt unplausibel in der Zukunft.',scope=kind)
                 start=parse_iso(value['start_at']) if value.get('start_at') else None
-                if start is None and published<now-timedelta(days=lookback):continue
+                event_day=datetime.fromisoformat(value['event_date']).date() if value.get('event_date') else None
+                if event_day:
+                    if event_day<now.date() or event_day>(now+timedelta(days=horizon)).date():continue
+                if start is None and event_day is None and published<now-timedelta(days=lookback):continue
                 if kind=='jkp' and value['status']=='unconfirmed' and now-published>timedelta(days=3):
                     value['status']='historical_unconfirmed'
                 if start:
@@ -149,8 +171,9 @@ class NoticeProvider:
                         if start>now+timedelta(days=horizon):continue
                         if start<=now:value['status']='start_passed'
             rows.append(value)
-        if kind in ('kultura','tourism'):
-            rows.sort(key=lambda x:(not bool(x.get('start_at')),x.get('start_at') or '',x['id']))
+        if kind in EVENT_PROVIDERS and kind!='manifestations':
+            # Preserve non-cinema notices even when a film programme has >20 slots.
+            rows.sort(key=lambda x:(x.get('event_type')=='cinema',not bool(x.get('start_at') or x.get('event_date')),x.get('start_at') or x.get('event_date') or '',x['id']))
         else:rows.sort(key=lambda x:x.get('published_at') or '',reverse=True)
         count=len(rows);selected=rows[:self.spec.max_items]
         # Explicit excerpts and list truncation; reserve room for common health fields.

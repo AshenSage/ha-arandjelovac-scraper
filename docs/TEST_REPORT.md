@@ -1,4 +1,4 @@
-# Prüfbericht · Aranđelovac Live 1.2.2
+# Prüfbericht · Aranđelovac Live 1.3.0
 
 Stand: 14.10.2026. Geprüftes Laufzeitziel: Home Assistant Core 2026.10.1, Python 3.14.2.
 
@@ -7,13 +7,13 @@ Stand: 14.10.2026. Geprüftes Laufzeitziel: Home Assistant Core 2026.10.1, Pytho
 | Ebene | Ergebnis |
 |---|---|
 | Ursprüngliche EDS-/Transport-/Coordinator-Prüfungen | 109 Tests erfolgreich |
-| Zusätzliche Quellen-, Datums-, Status-, Programm- und Budgetprüfungen | 50 Tests erfolgreich |
-| Gesamte Offline-Python-Suite | 159 Tests erfolgreich |
-| Reale HA-Core-Tests | 13 Tests erfolgreich |
-| Chromium-Karte | 219 Assertions erfolgreich, keine JavaScript-Fehler |
+| Zusätzliche Quellen-, Datums-, Status-, Programm- und Budgetprüfungen | 59 Tests erfolgreich |
+| Gesamte Offline-Python-Suite | 168 Tests erfolgreich |
+| Reale HA-Core-Tests | 17 Tests erfolgreich |
+| Chromium-Karte | 294 Assertions erfolgreich, keine JavaScript-Fehler |
 | Bildschirmbreiten | 320, 440 und 736 px, jeweils helles, dunkles und grünes Theme |
 | Struktur/Syntax | Python compileall, JavaScript node --check, JSON, Versionsabgleich und Paketstruktur erfolgreich |
-| Live-Quellen | Alle sechs Provider verfügbar; Details in live-verification.json |
+| Live-Quellen | Alle neun Provider verfügbar; Details in live-verification.json |
 
 Die zusätzlichen Quellentests verwenden reduzierte synthetische Beispiele entsprechend den untersuchten öffentlichen Strukturen. Die vollständigen Originalantworten neuer Artikel sind keine öffentlichen Repository-Fixtures. Die bestehenden EDS-Fixtures wurden aus dem früheren Paket übernommen.
 
@@ -21,13 +21,13 @@ Die zusätzlichen Quellentests verwenden reduzierte synthetische Beispiele entsp
 
 Die Prüfungen verwenden den echten HA Core und seine offiziellen Test-Fixtures, keine nachgebaute Entity Registry. Upstream-HTTP wird für reproduzierbare Laufzeittests ersetzt; ein separater Live-Test prüft die tatsächlichen Quellen.
 
-Geprüft: UI-/Import-Flow, sechs getrennte Einträge, Nachrüsten fehlender Quellen bei vorhandenem EDS, doppelte Konfiguration, Sensorplattform und zwölf Entitäten, echte Registry-Unique-IDs, Fehler nach Erfolg, Diagnose bei unavailable, Reload/Unload, Quellenisolation, Options Flow, tatsächliche HTTP-Auslieferung der Karten-Datei sowie Registrierung des Frontendmoduls.
+Geprüft: UI-/Import-Flow, neun getrennte Einträge, Nachrüsten fehlender Quellen bei vorhandenem EDS, doppelte Konfiguration, Sensorplattform und 18 Entitäten, echte Registry-Unique-IDs, Fehler nach Erfolg, Diagnose bei unavailable, Reload/Unload, Quellenisolation, Options Flow, tatsächliche HTTP-Auslieferung der Karten-Datei sowie Registrierung des Frontendmoduls.
 
 Der echte Laufzeittest zeigte, dass HA bei unavailable normale Extra-Attribute ausblendet. Deshalb ergänzt Version 1.2.0 pro Quelle einen stets lesbaren Diagnose-Sensor. Der Hauptsensor behält echte HA-Verfügbarkeit. Die Karte wird auch gegen genau diesen Fehlerzustand getestet.
 
 ## Browser-Prüfungen
 
-Getestet mit Chromium: Darstellung in zwei Themes und drei Breiten, aufklappbare Bereiche, Erhalt geöffneter Kacheln bei Zustandsupdates, der Titel Veranstaltungen & News, Quellenzählung, Quellenausfall, Diagnose bei fehlenden Hauptsensorattributen und Escaping fremder Texte/URLs. Bei keiner geprüften Breite tritt horizontales Überlaufen auf.
+Getestet mit Chromium: Darstellung in drei Themes und drei Breiten, aufklappbare Bereiche, Erhalt geöffneter Kacheln bei Zustandsupdates, der Titel Veranstaltungen & News, Quellenzählung, Quellenausfall, Diagnose bei fehlenden Hauptsensorattributen und Escaping fremder Texte/URLs. Bei keiner geprüften Breite tritt horizontales Überlaufen auf.
 
 Im isolierten Browser sind HA-eigene Icons Platzhalter; im laufenden HA stellt ha-icon die Symbole bereit. Die Karte selbst benötigt keine externen JavaScript-Bibliotheken.
 
@@ -39,6 +39,16 @@ Die 219 Browserprüfungen umfassen drei Themes mit drei Breiten sowie Warnungen 
 
 ## Nach Installation noch ausstehend
 
-Für 1.2.1 bestätigen die vom Nutzer gezeigten Smartphone-Screenshots eine geladene Karte nach manueller Ressourcenregistrierung und sechs erfolgreiche Quellenabrufe. Die Abnahme der Änderungen aus 1.2.2 auf dem tatsächlichen HA-System steht aus. Es wurde keine Verbindung zu seiner produktiven HA-Instanz hergestellt und dort nichts geändert.
+Für 1.2.1 bestätigen die vom Nutzer gezeigten Smartphone-Screenshots eine geladene Karte nach manueller Ressourcenregistrierung und sechs erfolgreiche Quellenabrufe. Die späteren Smartphone-Screenshots bestätigen auch die Darstellung von 1.2.2. Die Abnahme von Version 1.3.0 auf dem tatsächlichen HA-System steht aus. Es wurde keine Verbindung zu seiner produktiven HA-Instanz hergestellt und dort nichts geändert.
 
 RSS-Ausschnitte bleiben begrenzt; Bildbeiträge werden nicht per OCR gelesen. Kein Artikelstatus ersetzt eine Messung der Versorgung im Haus. Diese fachlichen Grenzen werden in Karte und README ausdrücklich ausgewiesen.
+
+## Veranstaltungen ohne Kino · Version 1.3.0
+
+Kino wird vor der Auswahl der Kartenanzeige ausgefiltert, einschliesslich älterer Einträge ohne `event_type`. Ein Filmprogramm mit mehr als 20 Vorstellungen verdrängt keine vorhandene Kulturankündigung aus dem Sensorbudget. In der Veranstaltungskarte gilt das bisherige Acht-Einträge-Limit nicht mehr; alle geladenen Nicht-Kino-Einträge werden angezeigt. Die Quellenzählung der Hauptsensoren bleibt erhalten.
+
+Neue Regressionen prüfen datierte Termine ohne Uhrzeit, vergangene Termine, Anmeldefristen, Lesungen, Saisonhinweise ohne erfundenes Jahr, Kinoausblendung, Sichtbarkeit nach dem achten Eintrag und den Monatswechsel bei der Terminvorschau. Die 294 Browserprüfungen laufen in drei Themes und drei Breiten; ein Kartenlimit von 1 blendet andere geladene Veranstaltungen nicht aus.
+
+Der echte HA-Upgrade-Test ergänzt ausschliesslich Museum, Bibliothek und Feste/Basare zu den sechs vorhandenen Quellen. Die bestehenden ConfigEntry-Objekte bleiben erhalten. Einrichtung aller neun Quellen, 18 Sensoren und Ausfall einer einzelnen Quelle werden ebenfalls im echten HA Core geprüft.
+
+Die drei zusätzlichen öffentlichen Quellen wurden mit dem produktiven HTTP- und Parserpfad live geprüft: Museum liefert aktuell keine Meldung im konfigurierten Zeitraum; die Bibliothek einen Termin am 15.10.2026 um 19:00; die Tourismusübersicht 13 allgemeine Saisonhinweise. Das sind Momentaufnahmen des Abrufs vom 14.10.2026, kein Anspruch auf einen vollständigen lokalen Veranstaltungskalender. Rohantworten bleiben lokale Recherchedateien; der veröffentlichte Bericht enthält Abrufmetadaten statt vollständiger fremder Artikel.

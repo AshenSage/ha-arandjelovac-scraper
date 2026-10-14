@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Explicit live or historical offline verification of all six sources."""
+"""Explicit live or historical offline verification of all configured sources."""
 from __future__ import annotations
 import argparse
 import asyncio

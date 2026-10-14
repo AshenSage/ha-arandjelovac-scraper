@@ -1,26 +1,19 @@
-# Aranđelovac Live 1.2.2
+# Aranđelovac Live 1.3.0
 
-Die Smartphone-Karte zeigt lokale Meldungen kompakter und verständlicher.
+Kino ist aus der Dashboardkarte ausgeblendet. Andere Veranstaltungen und Kulturmeldungen werden vollständig innerhalb des geladenen Quellenausschnitts angezeigt und nicht mehr nach acht Einträgen abgeschnitten.
 
-- Gültiges HA-Verkehrssymbol; alle verwendeten Symbole sind gegen den HA-2026.10.1-Katalog geprüft.
-- Verkehr mit kurzer Kategorie, ausdrücklich genannter Strecke, Ort und angekündigter Endfrist. Originalmeldung bleibt aufgeklappt lesbar; abgelaufene Fristen bestätigen keine Freigabe.
-- Verständliche Wassertexte mit Meldungsanzahl und Hinweis auf Bildbeiträge. Unterbruchsmeldungen behalten Vorrang.
-- Erkannte Veranstaltungen als Kino, Theater, Konzert oder Ausstellung. Einzeltermine aus Wochenprogrammen wiederholen den Gesamtplan nicht mehr und verlinken auf das Original.
-- Kompaktere Abstände, dezente Warnränder auf normaler Kartenfläche und besser lesbare Quellenstatus-Anzeigen im grünen Theme.
-- Quellenübersicht mit **6/6 Quellen erreichbar**.
+- Drei zusätzliche unabhängige Quellen: Museum, Bibliothek Sveti Sava und die Tourismusübersicht für Feste und Basare. Insgesamt neun Quellen und 18 Sensoren einschliesslich Quellenstatus.
+- Getrennte Anzeige für veröffentlichte Termine, Kulturmeldungen/Ankündigungen und allgemeine Saisonhinweise.
+- Ein Datum ohne Uhrzeit bleibt ein Datum ohne erfundene Startzeit. Vergangene erkennbare Termine werden entfernt; Ticketverkaufs- und Anmeldefristen werden nicht als Termine ausgegeben.
+- Kinofilter auch für ältere Karten-Daten ohne Kategorie. Sonstige Kulturmeldungen haben beim Sensor-Attributbudget Vorrang vor Filmprogrammen. Die Quellenzählung der Hauptsensoren bleibt für vorhandene Automationen erhalten.
+- Klarerer Wasserhinweis: „Teilweise als Bild verfügbar“.
 
 ## Aktualisieren
 
-1. In HACS auf **1.2.2** aktualisieren und Home Assistant vollständig neu starten.
-2. Bei einer manuell eingetragenen Dashboard-Ressource den bestehenden Eintrag auf diese URL ändern, Typ **JavaScript-Modul**:
-   `/arandjelovac_live/arandjelovac-live-card.js?v=1.2.2`
-3. HA-Seite beziehungsweise App vollständig neu laden.
+1. In HACS auf **1.3.0** aktualisieren und Home Assistant vollständig neu starten.
+2. **Einstellungen → Geräte & Dienste → Integration hinzufügen → Aranđelovac Live → Komplettpaket · alle 9 Quellen** wählen. Nur die drei fehlenden Quellen werden ergänzt; bestehende Einträge und Entitäts-IDs bleiben erhalten.
+3. Die vorhandene manuelle Dashboard-Ressource bearbeiten, Typ **JavaScript-Modul**:
+   `/arandjelovac_live/arandjelovac-live-card.js?v=1.3.0`
+4. HA-Seite beziehungsweise App vollständig neu laden. Die Karten-YAML bleibt gültig.
 
-Die Karten-YAML und vorhandene Entitäts-IDs bleiben erhalten:
-
-```yaml
-type: custom:arandjelovac-live-card
-title: Aranđelovac Live
-```
-
-Validierung: 159 Parser-/Transporttests, 13 echte HA-Tests und 219 Chromium-Prüfungen in drei Themes und drei Bildschirmbreiten. Die Abnahme der neuen Version in der produktiven HA-Installation steht aus.
+Die öffentlichen Quellen wurden live geprüft. Der Saisonkatalog bestätigt keine Jahrestermine; RSS bleibt ein begrenzter Ausschnitt. Die Abnahme dieser Version auf dem produktiven HA-System steht aus.

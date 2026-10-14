@@ -4,7 +4,7 @@
     "step": {
       "user": {
         "title": "Aranđelovac Live",
-        "description": "Richtet alle sechs Quellen oder eine einzelne Quelle ein. Jede Quelle erhält einen eigenen Eintrag. Die Dashboardkarte wird automatisch geladen.",
+        "description": "Richtet alle neun Quellen oder eine einzelne Quelle ein. Vorhandene Quellen bleiben erhalten; das Komplettpaket ergänzt fehlende Einträge.",
         "data": {
           "provider": "Quelle"
         }
@@ -52,6 +52,15 @@
       },
       "tourism_events": {
         "name": "Tourismusmeldungen"
+      },
+      "museum_events": {
+        "name": "Museumsprogramm"
+      },
+      "library_events": {
+        "name": "Bibliotheksprogramm"
+      },
+      "manifestations_events": {
+        "name": "Feste und Basare"
       }
     }
   }
