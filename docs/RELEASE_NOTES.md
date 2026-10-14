@@ -1,25 +1,26 @@
-# Aranđelovac Live 1.2.1
+# Aranđelovac Live 1.2.2
 
-- Behebt eine mögliche Ursache von **Custom element not found**: Die Karte wartet mit Klassenerstellung und Registrierung, bis Home Assistants Elementregistrierung bereit ist.
-- Automatische Frontendmodule und zusätzlich eingetragene Dashboard-Ressourcen können dieselbe Datei ohne doppelte Registrierung laden.
-- Neue Browserregressionen prüfen drei Ladereihenfolgen mit der echten HA-Polyfill-Version 0.0.10; die bestehende Oberfläche bleibt erhalten.
-- Nach dem Update HA neu starten und die Seite beziehungsweise App neu laden. Die bestehende Karten-YAML bleibt gültig.
+Die Smartphone-Karte zeigt lokale Meldungen kompakter und verständlicher.
 
-## Komplettpaket seit 1.2.0
+- Gültiges HA-Verkehrssymbol; alle verwendeten Symbole sind gegen den HA-2026.10.1-Katalog geprüft.
+- Verkehr mit kurzer Kategorie, ausdrücklich genannter Strecke, Ort und angekündigter Endfrist. Originalmeldung bleibt aufgeklappt lesbar; abgelaufene Fristen bestätigen keine Freigabe.
+- Verständliche Wassertexte mit Meldungsanzahl und Hinweis auf Bildbeiträge. Unterbruchsmeldungen behalten Vorrang.
+- Erkannte Veranstaltungen als Kino, Theater, Konzert oder Ausstellung. Einzeltermine aus Wochenprogrammen wiederholen den Gesamtplan nicht mehr und verlinken auf das Original.
+- Kompaktere Abstände, dezente Warnränder auf normaler Kartenfläche und besser lesbare Quellenstatus-Anzeigen im grünen Theme.
+- Quellenübersicht mit **6/6 Quellen erreichbar**.
 
-Komplettpaket für Strom, Wasser, Verkehr, Gemeindemeldungen sowie Kultur und Tourismus. Aufklappbare, HA-Theme-kompatible Smartphone-Karte mit **Veranstaltungen & News** und getrenntem Quellenstatus.
+## Aktualisieren
 
-- Bestehender EDS-Provider und seine Entitätsidentität bleiben erhalten.
-- Einrichtung aller sechs unabhängigen Quellen mit einem Auswahlpunkt.
-- Frontenddatei wird automatisch ausgeliefert und geladen.
-- Bildbeiträge, unbestätigte Enden, verkürzte Abdeckung und Quellenfehler werden ausdrücklich angezeigt.
-- Reale HA-Core-2026.10.1-Laufzeittests, Parserregressionen und Chromium-Tests in zwei Themes und drei Bildschirmbreiten.
+1. In HACS auf **1.2.2** aktualisieren und Home Assistant vollständig neu starten.
+2. Bei einer manuell eingetragenen Dashboard-Ressource den bestehenden Eintrag auf diese URL ändern, Typ **JavaScript-Modul**:
+   `/arandjelovac_live/arandjelovac-live-card.js?v=1.2.2`
+3. HA-Seite beziehungsweise App vollständig neu laden.
 
-Nach HACS-Installation HA neu starten, **Aranđelovac Live → Komplettpaket** hinzufügen und die HA-Seite neu laden. Karte:
+Die Karten-YAML und vorhandene Entitäts-IDs bleiben erhalten:
 
 ```yaml
 type: custom:arandjelovac-live-card
 title: Aranđelovac Live
 ```
 
-Details und Grenzen stehen in README und TEST_REPORT. Test in der produktiven HA-Installation steht noch aus.
+Validierung: 159 Parser-/Transporttests, 13 echte HA-Tests und 219 Chromium-Prüfungen in drei Themes und drei Bildschirmbreiten. Die Abnahme der neuen Version in der produktiven HA-Installation steht aus.

@@ -198,6 +198,14 @@ def parse_traffic(raw: str, base: str, now: datetime) -> tuple[dict,...]:
                'status':'published','start_at':None,'end_at':None,'category':category,
                # `point` is an image coordinate, deliberately not a latitude/longitude.
                'geolocation':None,'_match_text':normalize(title+' '+description)}
+        # Preserve names exactly as published; only the category is translated
+        # by the card. Do not guess a route from the configured place filter.
+        for field,pattern in (
+            ('route',r'\b(?:deonic[aeiu]|деониц[аеиу])\s+([^,;\n]+)'),
+            ('place',r'\b(?:mest[ou]|мест[оу])\s+([^,;.\n]+)'),
+        ):
+            match=re.search(pattern,title,re.I) or re.search(pattern,description,re.I)
+            if match:value[field]=excerpt(match[1].strip().rstrip('.'),160)
         # Parse only explicit "do DD.MM.YYYY" deadlines, never the article date.
         end_match=re.search(r'\bdo\s+(\d{1,2})\.\s*(\d{1,2})\.\s*(20\d{2})',normalize(description))
         if end_match:
@@ -225,6 +233,13 @@ def matches_area(text: str, areas: tuple[str,...]) -> tuple[str,...]:
 
 
 def event_items(article: Article) -> tuple[dict,...]:
+    # Classify only an explicit article heading/URL, not incidental body words.
+    heading=normalize(article.title+' '+article.url)
+    event_type=next((kind for kind,pattern in (
+        ('cinema',r'filmski[-\s]+program|bioskop'),('theatre',r'pozoris|(?:^|[\s/-])predstava\b'),
+        ('concert',r'koncert'),('exhibition',r'izlozb'),
+    ) if re.search(pattern,heading)),None)
+    extra={'event_type':event_type} if event_type else {}
     lines=article.text.splitlines();day=None;events=[]
     for line in lines:
         dm=re.fullmatch(r'\s*(\d{1,2})\.(\d{1,2})\.(?:(20\d{2})\.?)?\s*',line)
@@ -234,7 +249,8 @@ def event_items(article: Article) -> tuple[dict,...]:
         if day is not None and tm:
             start=local_time(day.year,day.month,day.day,int(tm[1]),int(tm[2]))
             events.append(item(article,'event',id=article.id+':'+start.isoformat(),title=excerpt(tm[3],350),
-                               start_at=start.isoformat(),status='scheduled',date_inferred_year=True))
+                               description='',program_split=True,program_title=excerpt(article.title,350),
+                               start_at=start.isoformat(),status='scheduled',date_inferred_year=True,**extra))
     if events:return tuple(events)
     # Prefer the title. A ticket-sale date in body text is not an event date.
     day=named_date(article.title,article.published)
@@ -243,5 +259,5 @@ def event_items(article: Article) -> tuple[dict,...]:
         day=named_date(article.text,article.published);time=clock_time(article.text)
     if day and time:
         start=local_time(day.year,day.month,day.day,*time)
-        return (item(article,'event',start_at=start.isoformat(),status='scheduled'),)
-    return (item(article,'announcement',status='image_only' if article.image_only else 'announcement'),)
+        return (item(article,'event',start_at=start.isoformat(),status='scheduled',**extra),)
+    return (item(article,'announcement',status='image_only' if article.image_only else 'announcement',**extra),)

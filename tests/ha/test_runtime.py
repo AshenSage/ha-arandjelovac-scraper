@@ -15,6 +15,19 @@ from custom_components.arandjelovac_live.providers.notices.provider import Notic
 from custom_components.arandjelovac_live.config_flow import PROVIDERS
 
 
+def test_card_and_provider_icons_exist_in_supported_frontend():
+    """Catch blank icon boxes against HA's actual bundled MDI catalogue."""
+    import json
+    import re
+    from pathlib import Path
+    import hass_frontend
+    from custom_components.arandjelovac_live.providers.notices.provider import SOURCES
+    names={entry['name'] for entry in json.loads((Path(hass_frontend.__file__).parent/'static/mdi/iconList.json').read_text())}
+    card=(Path(__file__).parents[2]/'custom_components/arandjelovac_live/frontend/arandjelovac-live-card.js').read_text()
+    used=set(re.findall(r'mdi:([a-z0-9-]+)',card))|{source['icon'].removeprefix('mdi:') for source in SOURCES.values()}
+    assert used<=names,f'Unknown HA icons: {used-names}'
+
+
 async def test_complete_package_creates_independent_entries(hass):
     with patch('custom_components.arandjelovac_live.async_setup_entry',return_value=True):
         first=await hass.config_entries.flow.async_init(DOMAIN,context={'source':config_entries.SOURCE_USER})

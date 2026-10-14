@@ -107,6 +107,20 @@ class WaterTests(unittest.TestCase):
         with self.assertRaises(SourceError):water_notice(article(title='Planski prekid vodosnabdevanja 15. oktobra 2026.',text='Prekid vodosnabdevanja od 17 do 8 casova.'))
 
 class TrafficTests(unittest.TestCase):
+    def test_route_place_and_deadline_preserve_source_names(self):
+        title='31.8.2026.Obustava na putu, deonica Lazarevac – Darosava (Belanovica), mesto Кruševica'
+        row=parse_traffic(HEADER+traffic_row(title=title),'https://www.putevi-srbije.rs/',NOW)[0]
+        self.assertEqual(row['route'],'Lazarevac – Darosava (Belanovica)')
+        self.assertEqual(row['place'],'Кruševica')
+        self.assertEqual(row['title'],title)
+        self.assertEqual(row['deadline_date'],'2026-12-26')
+    def test_cyrillic_route_and_description_fallback(self):
+        row=parse_traffic(HEADER+traffic_row(title='Радови',text='Деоница Аранђеловац – Топола, место Бања.'),'https://www.putevi-srbije.rs/',NOW)[0]
+        self.assertEqual(row['route'],'Аранђеловац – Топола')
+        self.assertEqual(row['place'],'Бања')
+    def test_missing_route_is_not_invented_from_place(self):
+        row=parse_traffic(HEADER+traffic_row(),'https://www.putevi-srbije.rs/',NOW)[0]
+        self.assertNotIn('route',row);self.assertNotIn('place',row)
     def test_category_deadline_and_no_fake_geolocation(self):
         row=parse_traffic(HEADER+traffic_row(),'https://www.putevi-srbije.rs/stanje/novamapa/textfile.txt',NOW)[0]
         self.assertEqual(row['kind'],'closure');self.assertEqual(row['end_at'],'2026-12-27T00:00:00+01:00')
@@ -125,6 +139,24 @@ class TrafficTests(unittest.TestCase):
         self.assertIsNone(parse_traffic(HEADER+row,'https://www.putevi-srbije.rs/stanje/novamapa/textfile.txt',NOW)[0]['end_at'])
 
 class EventTests(unittest.TestCase):
+    def test_split_program_has_individual_titles_and_original_link(self):
+        source=article(title='Филмски програм',text='14.10.\n18:00 – Film A\n20:00 - Film B')
+        rows=event_items(source)
+        self.assertEqual([row['title'] for row in rows],['Film A','Film B'])
+        for row in rows:
+            self.assertEqual(row['description'],'')
+            self.assertTrue(row['program_split'])
+            self.assertEqual(row['program_title'],source.title)
+            self.assertEqual(row['source_url'],source.url)
+            self.assertEqual(row['event_type'],'cinema')
+    def test_single_event_keeps_description_and_explicit_type(self):
+        row=event_items(article(title='Predstava 15. oktobra od 20 sati',text='Gostuje poznato pozoriste.'))[0]
+        self.assertEqual(row['event_type'],'theatre')
+        self.assertEqual(row['description'],'Gostuje poznato pozoriste.')
+        self.assertNotIn('program_split',row)
+    def test_body_mention_does_not_classify_unknown_event(self):
+        row=event_items(article(title='Susret 15. oktobra od 20 sati',text='Bioskop radi vikendom.'))[0]
+        self.assertNotIn('event_type',row)
     def test_program_splits_days_and_times(self):
         rows=event_items(article(title='Filmski program',text='14.10.\n18:00 – Film A\n20:00 - Film B\n15.10.\n18:00 – Film C'))
         self.assertEqual(len(rows),3);self.assertEqual(rows[2]['start_at'],'2026-10-15T18:00:00+02:00')

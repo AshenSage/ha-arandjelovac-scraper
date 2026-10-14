@@ -19,16 +19,20 @@ type: custom:arandjelovac-live-card
 title: Aranđelovac Live
 ```
 
-Die Karte wird automatisch ausgeliefert und als zusätzliches Frontendmodul geladen. Kein Kopieren nach `www`, kein zweites HACS-Repository und keine manuelle Ressourcenregistrierung nötig. Nach einem Python-Update HA neu starten; nach einem Kartenupdate auch den Browser neu laden.
+Die Integration liefert die Karte aus und meldet sie als zusätzliches Frontendmodul an. Kein Kopieren nach `www` und kein zweites HACS-Repository nötig. Falls die automatische Einbindung im verwendeten Frontend nicht greift, die unten genannte Dashboard-Ressource eintragen. Nach einem Python-Update HA neu starten; nach einem Kartenupdate auch den Browser neu laden.
 
-Ab Version 1.2.1 wartet die Karte auf die HA-Oberfläche, bevor sie sich registriert. Das verhindert den bekannten Verlust früh geladener Custom Elements beim Wechsel der HA-Elementregistrierung.
+Seit Version 1.2.1 wartet die Karte auf die HA-Oberfläche, bevor sie sich registriert. Das verhindert den bekannten Verlust früh geladener Custom Elements beim Wechsel der HA-Elementregistrierung.
 
 Falls die Karte nach dem Neustart noch nicht erkannt wird:
 
 1. Unter **Einstellungen → Geräte & Dienste** prüfen, ob **Aranđelovac Live** eingerichtet ist. Ein Download in HACS allein aktiviert die Integration noch nicht.
 2. HA vollständig neu starten und anschliessend die HA-Seite beziehungsweise App neu laden.
-3. Nur bei weiter bestehendem Fehler unter **Dashboards → Ressourcen** diese URL als **JavaScript-Modul** ergänzen: `/arandjelovac_live/arandjelovac-live-card.js?v=1.2.1`. Falls der Menüpunkt fehlt, im Benutzerprofil den erweiterten Modus einschalten.
+3. Nur bei weiter bestehendem Fehler unter **Dashboards → Ressourcen** diese URL als **JavaScript-Modul** ergänzen: `/arandjelovac_live/arandjelovac-live-card.js?v=1.2.2`. Falls der Menüpunkt fehlt, im Benutzerprofil den erweiterten Modus einschalten.
 4. Liefert dieselbe URL beim direkten Öffnen eine 404-Seite, ist die Integration noch nicht geladen. Dann zuerst die Integrationsseite und HA-Protokolle prüfen; eine Ressourcenregistrierung behebt keinen fehlenden HTTP-Pfad.
+
+Bei einer bereits manuell eingetragenen Ressource deren URL nach dem Update auf `?v=1.2.2` ändern und die HA-Seite beziehungsweise App neu laden. Den bestehenden Eintrag bearbeiten, keine zweite Ressource hinzufügen. Die Karten-YAML und Entitäts-IDs bleiben erhalten.
+
+Die Karte zeigt kompakte Verkehrszusammenfassungen mit ausdrücklich genannter Strecke, Ort und Frist. Warnungen verwenden einen farbigen Rand auf der normalen Kartenfläche. Wassertexte nennen Meldungen und weisen auf Bildbeiträge hin. Erkannte Veranstaltungstypen erscheinen als Kino, Theater, Konzert oder Ausstellung. Einzeltermine aus Programmen verlinken auf das Original, statt den gesamten Wochenplan zu wiederholen. **6/6 Quellen erreichbar** bezeichnet erfolgreiche, noch aktuelle Quellenabrufe und keine bestätigte Versorgung im Haus.
 
 ## Quellen und Sensoren
 
