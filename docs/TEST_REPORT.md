@@ -1,4 +1,4 @@
-# Prüfbericht · Aranđelovac Live 1.3.1
+# Prüfbericht · Aranđelovac Live 1.4.0
 
 Stand: 14.10.2026. Geprüftes Laufzeitziel: Home Assistant Core 2026.10.1, Python 3.14.2.
 
@@ -10,7 +10,7 @@ Stand: 14.10.2026. Geprüftes Laufzeitziel: Home Assistant Core 2026.10.1, Pytho
 | Zusätzliche Quellen-, Datums-, Status-, Programm- und Budgetprüfungen | 59 Tests erfolgreich |
 | Gesamte Offline-Python-Suite | 168 Tests erfolgreich |
 | Reale HA-Core-Tests | 17 Tests erfolgreich |
-| Chromium-Karte | 473 Assertions erfolgreich, keine JavaScript-Fehler |
+| Chromium-Karte | 727 Assertions erfolgreich, keine JavaScript-Fehler |
 | Bildschirmbreiten | 320, 440 und 736 px, jeweils helles, dunkles und grünes Theme |
 | Struktur/Syntax | Python compileall, JavaScript node --check, JSON, Versionsabgleich und Paketstruktur erfolgreich |
 | Live-Quellen | Alle neun Provider verfügbar; Details in live-verification.json |
@@ -27,7 +27,7 @@ Der echte Laufzeittest zeigte, dass HA bei unavailable normale Extra-Attribute a
 
 ## Browser-Prüfungen
 
-Getestet mit Chromium: Darstellung in drei Themes und drei Breiten, aufklappbare Bereiche, Erhalt geöffneter Kacheln bei Zustandsupdates, der Titel Veranstaltungen & News, Quellenzählung, Quellenausfall, Diagnose bei fehlenden Hauptsensorattributen und Escaping fremder Texte/URLs. Bei keiner geprüften Breite tritt horizontales Überlaufen auf.
+Getestet mit Chromium: Darstellung in drei Themes und drei Breiten, aufklappbare Bereiche, Erhalt geöffneter Kacheln bei Zustandsupdates, die klaren Bereiche für Versorgung, Veranstaltungen und Gemeinde, Quellenzählung, Quellenausfall, Diagnose bei fehlenden Hauptsensorattributen und Escaping fremder Texte/URLs. Bei keiner geprüften Breite tritt horizontales Überlaufen auf.
 
 Im isolierten Browser sind HA-eigene Icons Platzhalter; im laufenden HA stellt ha-icon die Symbole bereit. Die Karte selbst benötigt keine externen JavaScript-Bibliotheken.
 
@@ -39,7 +39,7 @@ Die 219 Browserprüfungen umfassen drei Themes mit drei Breiten sowie Warnungen 
 
 ## Nach Installation noch ausstehend
 
-Für 1.2.1 bestätigen die vom Nutzer gezeigten Smartphone-Screenshots eine geladene Karte nach manueller Ressourcenregistrierung und sechs erfolgreiche Quellenabrufe. Die späteren Smartphone-Screenshots bestätigen auch die Darstellung von 1.2.2. Die weiteren Smartphone-Screenshots vom 14.10.2026 bestätigen Version 1.3.0 mit neun erreichbaren Quellen, einer datierten Lesung, einer getrennten Theaterankündigung und den Saisonhinweisen ohne Kino. Die produktive Abnahme von Version 1.3.1 steht noch aus. Es wurde keine Verbindung zu seiner produktiven HA-Instanz hergestellt und dort nichts geändert.
+Für 1.2.1 bestätigen die vom Nutzer gezeigten Smartphone-Screenshots eine geladene Karte nach manueller Ressourcenregistrierung und sechs erfolgreiche Quellenabrufe. Die späteren Smartphone-Screenshots bestätigen auch die Darstellung von 1.2.2. Die weiteren Smartphone-Screenshots vom 14.10.2026 bestätigen Version 1.3.0 mit neun erreichbaren Quellen, einer datierten Lesung, einer getrennten Theaterankündigung und den Saisonhinweisen ohne Kino. Die folgenden Screenshots bestätigen auch die Textaufklappung und Veranstaltungsicons von 1.3.1. Die produktive Abnahme von Version 1.4.0 steht noch aus. Es wurde keine Verbindung zu seiner produktiven HA-Instanz hergestellt und dort nichts geändert.
 
 RSS-Ausschnitte bleiben begrenzt; Bildbeiträge werden nicht per OCR gelesen. Kein Artikelstatus ersetzt eine Messung der Versorgung im Haus. Diese fachlichen Grenzen werden in Karte und README ausdrücklich ausgewiesen.
 
@@ -63,3 +63,18 @@ Lange Texte werden per nativem Details-Element geöffnet und geschlossen; die Vo
 Alle sechs Veranstaltungsarten erhalten unterschiedliche Symbole. Der Hauptbereich wechselt beim nächsten Theatertermin bzw. Markttermin zum passenden Icon. Ein Test im realen HA Core prüft sämtliche verwendeten MDI-Namen gegen den ausgelieferten Katalog. Eine zusätzliche lokale Sichtprüfung verwendet dessen tatsächliche SVG-Pfade mit erfassten Quelldaten im grünen Theme; weder die geschlossene Karte noch geöffnete Veranstaltungs-, Saison-, Nachrichten- oder Quellenbereiche laufen bei den drei geprüften Breiten horizontal über.
 
 Die unveränderte Python-Suite besteht mit 168 Tests, die reale HA-Suite mit 17 Tests. Versionsabgleich, Paketprüfung und Python-/JavaScript-Syntaxprüfung bestehen ebenfalls. Diese Version ändert ausschliesslich die Darstellung und die Paketversion; ein erneuter Live-Abruf der unveränderten Quellenparser ist dafür nicht erforderlich. Die vorhandenen Live-Ergebnisse sind weiterhin mit ihrem tatsächlichen Abrufzeitpunkt dokumentiert.
+
+
+## Veranstaltungsreiter und Kalenderdatum · Version 1.4.0
+
+Die freigegebene Reiteransicht ist in der tatsächlich ausgelieferten HA-Karte umgesetzt. Die 727 Chromium-Assertions decken drei Themes und 320, 440 und 736 px ab. Geprüft werden die Anzahlen und Inhalte aller drei Reiter, der vollständige Kinofilter, die Sichtbarkeit nach dem achten geladenen Eintrag auch mit `max_items: 1`, Kalenderdatum und Wochentag sowie Termine ohne erfundene Uhrzeit.
+
+Die Tests bedienen die Oberfläche mit Klicks, Enter, Pfeiltasten und Pos1/Ende. Auswahl, native Detailzustände und Fokus bleiben bei realen Sensoränderungen und erzwungener Minutenaktualisierung erhalten. Eine zweite Karte besitzt eine unabhängige Auswahl. Leere Kategorien und ein erster Datenstand ohne datierte Veranstaltung werden ebenfalls geprüft.
+
+Die Datumsprüfungen erfassen den Monatswechsel, einen UTC-Zeitpunkt nach Mitternacht in Europe/Belgrade, den lokalen Tageswechsel, vergangene Datumstermine, bereits beendete Veranstaltungen und einen heute vergangenen Beginn ohne bekanntes Ende. Diese Fälle werden mit einer festen Browseruhr geprüft; die tatsächliche Minutenaktualisierung erfordert keine weitere Quellenabfrage. Allgemeine Saisonmonate, kyrillische Monatsangaben, Monatsspannen und numerische Saisonangaben werden ohne erfundenes Jahr ausgegeben.
+
+Bei Teilausfall bleibt die fehlende Quelle sichtbar. Bei Ausfall aller Veranstaltungsquellen steht die Anzahl auf unbekannt, nicht auf null. Fremde Titel, lange Texte, Datensatz-IDs und Links werden auch nach dem Öffnen der Veranstaltungsdetails auf Escaping und sichere Links geprüft.
+
+Die Quellenstatus-Texte und die ausgewählten Reiter erreichen in den drei geprüften Paletten mindestens 4.5:1 Kontrast, die Erfolgsicons mindestens 3:1. Die Beschriftungen der drei Reiter passen bei jeder geprüften Breite ohne horizontales Überlaufen. Eine lokale Sichtprüfung mit den echten HA-MDI-SVGs und zuvor erfassten Quelldaten bestätigt die Reiteransicht sowie geöffnete Termin-, Saison- und Quellenbereiche. Diese Aufnahme ist eine lokale Datenwiedergabe, keine Verbindung zur produktiven HA-Instanz.
+
+Die 168 Python-Prüfungen und alle 17 realen HA-Core-Prüfungen bestehen. Der HTTP-Laufzeittest verifiziert die aktualisierte Karten-Datei mit Reitern und Kalenderdarstellung. Die Quellenparser und Abfrageintervalle bleiben unverändert; es wurde für dieses Darstellungsupdate kein neuer Live-Quellenabruf als erforderlich ausgegeben.

@@ -1,6 +1,6 @@
 # Aranđelovac Live
 
-Lokale Informationen für Home Assistant: geplante Stromabschaltungen, Wassermeldungen, Verkehr, Veranstaltungen und Gemeindemeldungen. Eine gemeinsame, aufklappbare Dashboardkarte für das Smartphone. Der Abschnitt für Kultur und Gemeinde heisst **Veranstaltungen & News**.
+Lokale Informationen für Home Assistant: geplante Stromabschaltungen, Wassermeldungen, Verkehr, Veranstaltungen und Gemeindemeldungen. Eine gemeinsame Dashboardkarte für das Smartphone mit den klar getrennten Bereichen **Versorgung & Verkehr**, **Veranstaltungen** und **Nachrichten aus der Gemeinde**.
 
 ## Installation mit HACS
 
@@ -27,10 +27,10 @@ Falls die Karte nach dem Neustart noch nicht erkannt wird:
 
 1. Unter **Einstellungen → Geräte & Dienste** prüfen, ob **Aranđelovac Live** eingerichtet ist. Ein Download in HACS allein aktiviert die Integration noch nicht.
 2. HA vollständig neu starten und anschliessend die HA-Seite beziehungsweise App neu laden.
-3. Nur bei weiter bestehendem Fehler unter **Dashboards → Ressourcen** diese URL als **JavaScript-Modul** ergänzen: `/arandjelovac_live/arandjelovac-live-card.js?v=1.3.1`. Falls der Menüpunkt fehlt, im Benutzerprofil den erweiterten Modus einschalten.
+3. Nur bei weiter bestehendem Fehler unter **Dashboards → Ressourcen** diese URL als **JavaScript-Modul** ergänzen: `/arandjelovac_live/arandjelovac-live-card.js?v=1.4.0`. Falls der Menüpunkt fehlt, im Benutzerprofil den erweiterten Modus einschalten.
 4. Liefert dieselbe URL beim direkten Öffnen eine 404-Seite, ist die Integration noch nicht geladen. Dann zuerst die Integrationsseite und HA-Protokolle prüfen; eine Ressourcenregistrierung behebt keinen fehlenden HTTP-Pfad.
 
-Bei einer bereits manuell eingetragenen Ressource deren URL nach dem Update auf `?v=1.3.1` ändern und die HA-Seite beziehungsweise App neu laden. Den bestehenden Eintrag bearbeiten, keine zweite Ressource hinzufügen. Die Karten-YAML und Entitäts-IDs bleiben erhalten.
+Bei einer bereits manuell eingetragenen Ressource deren URL nach dem Update auf `?v=1.4.0` ändern und die HA-Seite beziehungsweise App neu laden. Den bestehenden Eintrag bearbeiten, keine zweite Ressource hinzufügen. Die Karten-YAML und Entitäts-IDs bleiben erhalten.
 
 Die Karte zeigt kompakte Verkehrszusammenfassungen mit ausdrücklich genannter Strecke, Ort und Frist. Warnungen verwenden einen farbigen Rand auf der normalen Kartenfläche. Wassertexte nennen Meldungen und weisen auf Bildbeiträge hin. Kino ist in der Dashboardkarte ausgeblendet. Theater, Konzerte, Ausstellungen, Lesungen und andere Kulturmeldungen bleiben sichtbar. Einzeltermine aus Programmen verlinken auf das Original, statt den gesamten Wochenplan zu wiederholen. **9/9 Quellen erreichbar** bezeichnet erfolgreiche, noch aktuelle Quellenabrufe und keine bestätigte Versorgung im Haus.
 
@@ -67,7 +67,7 @@ entities:
   manifestations: sensor.arandjelovac_manifestations_events
 ```
 
-`transliterate: true` zeigt kyrillische Meldungen in lateinischer serbischer Schrift. Es ist keine Übersetzung. Originaltexte bleiben in den Sensorattributen und auf der Quellenseite erhalten. Maximal 20 Einträge pro Quelle innerhalb des Attributbudgets; Kürzungen werden gekennzeichnet. Bei Veranstaltungen erscheinen alle geladenen Einträge ausser Kino, getrennt nach veröffentlichten Terminen, Kulturmeldungen/Ankündigungen und Saisonübersicht. `max_items` begrenzt nur die übrigen Bereiche. Die Hauptsensoren behalten ihre Quellenzählung einschliesslich Kino für vorhandene Automationen; die Kinoausblendung betrifft die Dashboardkarte. Andere Kulturmeldungen haben bei der Attributauswahl Vorrang vor Kinoterminen.
+`transliterate: true` zeigt kyrillische Meldungen in lateinischer serbischer Schrift. Es ist keine Übersetzung. Originaltexte bleiben in den Sensorattributen und auf der Quellenseite erhalten. Maximal 20 Einträge pro Quelle innerhalb des Attributbudgets; Kürzungen werden gekennzeichnet. Bei Veranstaltungen erscheinen alle geladenen Einträge ausser Kino, in den Reitern **Termine**, **Vorschau** und **Feste**. Vergangene erkennbare Termine werden auch bei der lokalen Minutenaktualisierung ausgeblendet. `max_items` begrenzt nur die übrigen Bereiche. Die Hauptsensoren behalten ihre Quellenzählung einschliesslich Kino für vorhandene Automationen; die Kinoausblendung betrifft die Dashboardkarte. Andere Kulturmeldungen haben bei der Attributauswahl Vorrang vor Kinoterminen.
 
 ## Bedeutung und Grenzen der Anzeige
 
@@ -99,17 +99,25 @@ Unter **Geräte & Dienste → Aranđelovac Live → Quelle → Konfigurieren** l
 
 Die lokale Minutenprüfung aktualisiert Ablauf und Quellenfrische ohne zusätzliche HTTP-Anfrage. Standard-Anzeigezeitraum: 30 Tage, Veranstaltungshorizont: 60 Tage. Fehler führen zu keinem sofortigen Retry-Sturm. Ein manueller Abruf ist über `homeassistant.update_entity` auf dem Hauptsensor möglich.
 
-## Update von Version 1.3.0
+## Update von Version 1.3.x
 
-In HACS auf **1.3.1** aktualisieren und HA neu starten. Die vorhandene manuelle Dashboard-Ressource auf `?v=1.3.1` ändern und die HA-Seite bzw. App neu laden. Bereits eingerichtete Quellen bleiben erhalten; der Einrichtungsdialog muss nicht erneut durchlaufen werden.
+In HACS auf **1.4.0** aktualisieren und HA neu starten. Die vorhandene manuelle Dashboard-Ressource auf `?v=1.4.0` ändern und die HA-Seite bzw. App neu laden. Bereits eingerichtete Quellen bleiben erhalten; der Einrichtungsdialog muss nicht erneut durchlaufen werden.
 
-Lange Meldungstexte zeigen eine kurze Vorschau mit **Mehr anzeigen / Weniger anzeigen**. Ein am Textanfang wiederholter vollständiger Titel wird ausgeblendet. Die Saisonübersicht ist innerhalb des Veranstaltungsbereichs separat zugeklappt. Geöffnete Texte und Bereiche bleiben bei Daten- und Minutenupdates geöffnet. Veröffentlichungsdaten heissen ausdrücklich **Veröffentlicht am**; Veranstaltungsdaten behalten ihre eigene Anzeige.
+Die Veranstaltungskarte ist direkt sichtbar und nutzt drei Reiter mit Eintragszahl:
 
-Veranstaltungsarten haben eigene Symbole: Theatermasken, Musiknote, Farbpalette, Buch, Marktstand und Festivaldekoration. Die Vorschau übernimmt das Symbol des nächsten Termins. Saisonmonate erscheinen auf Deutsch, ohne daraus einen Jahrestermin abzuleiten. Artikeltexte und Titel bleiben in der Quellsprache; `transliterate` steuert weiterhin nur die Schrift.
+- **Termine:** Chronologisch nach veröffentlichtem Veranstaltungsdatum. Ein Kalenderblatt zeigt Tag, Monat und Wochentag; Uhrzeit und Titel stehen daneben. Ein Datum ohne Uhrzeit bleibt ausdrücklich ohne Uhrzeit.
+- **Vorschau:** Kulturmeldungen und Ankündigungen ohne bestätigten Veranstaltungstermin. Das Veröffentlichungsdatum steht in den aufklappbaren Details, ausdrücklich als solches bezeichnet.
+- **Feste:** Der allgemeine Saisonkatalog mit deutschen Monatskürzeln. Monatsspannen und Sommerangaben bleiben allgemeine Hinweise ohne erfundenen Jahrestermin.
+
+Alle geladenen anderen Veranstaltungen bleiben über die Reiter erreichbar; Kino ist ausgeblendet. Eine einzelne Zeile öffnet Titel, Quellentext und Originalverweis. Veranstaltungsarten haben eigene Symbole. Der gewählte Reiter, geöffnete Einträge und der Tastaturfokus bleiben bei Daten- und Minutenupdates erhalten. Reiter lassen sich mit den Pfeiltasten sowie Pos1/Ende bedienen. Beim ersten Laden wird ein vorhandener Bereich gewählt; eine bewusst gewählte leere Kategorie bleibt bei späteren Updates ausgewählt.
+
+Lange Wasser-, Verkehrs- und Gemeindetexte behalten **Mehr anzeigen / Weniger anzeigen**. Wiederholte vollständige Überschriften am Textanfang werden ausgeblendet. Veröffentlichungsdaten heissen **Veröffentlicht am**. Artikeltexte und Titel bleiben in der Quellsprache; `transliterate` steuert weiterhin nur die Schrift.
+
+Quellenfehler werden unter dem Veranstaltungsbereich angezeigt. Wenn keine Veranstaltungsquelle verfügbar ist, zeigen die Reiter **–** anstelle einer vermeintlichen Nullzählung.
 
 ## Update von Version 1.2.x
 
-Nach HACS-Update und HA-Neustart unter **Einstellungen → Geräte & Dienste → Integration hinzufügen → Aranđelovac Live → Komplettpaket · alle 9 Quellen** wählen. Dadurch werden nur Museum, Bibliothek und Feste/Basare ergänzt. Die bisherigen sechs Einträge bleiben erhalten. Anschliessend die bestehende manuelle Dashboard-Ressource auf `?v=1.3.1` aktualisieren und die HA-Seite neu laden. Die Karten-YAML bleibt gültig.
+Nach HACS-Update und HA-Neustart unter **Einstellungen → Geräte & Dienste → Integration hinzufügen → Aranđelovac Live → Komplettpaket · alle 9 Quellen** wählen. Dadurch werden nur Museum, Bibliothek und Feste/Basare ergänzt. Die bisherigen sechs Einträge bleiben erhalten. Anschliessend die bestehende manuelle Dashboard-Ressource auf `?v=1.4.0` aktualisieren und die HA-Seite neu laden. Die Karten-YAML bleibt gültig.
 
 ## Update von Version 1.1.0
 
@@ -144,4 +152,4 @@ python tools/sources_probe.py --live
 
 Die Option `--proxy-env` gilt ausschliesslich für Entwicklungsumgebungen mit vorgegebenem Proxy. Die laufende Integration verwendet die HA-HTTP-Session. Live-Captures gehören nicht ins öffentliche Repository.
 
-Prüfstand und verbleibende Abnahme: [docs/TEST_REPORT.md](docs/TEST_REPORT.md). Die Smartphone-Screenshots bestätigen Version 1.3.0 mit neun erreichbaren Quellen; die Darstellung von 1.3.1 wird nach Installation geprüft.
+Prüfstand und verbleibende Abnahme: [docs/TEST_REPORT.md](docs/TEST_REPORT.md). Die Smartphone-Screenshots bestätigen die bisherigen Versionen bis 1.3.1; die Darstellung von 1.4.0 wird nach Installation geprüft.

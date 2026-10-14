@@ -1,4 +1,4 @@
-/* Aranđelovac Live 1.3.1 — self-contained HA card, no browser-side scraping. */
+/* Aranđelovac Live 1.4.0 — self-contained HA card, no browser-side scraping. */
 // HA's scoped-registry polyfill replaces both customElements and HTMLElement.
 // Wait before creating the class, not just before defining its tag. A native
 // whenDefined promise also resolves when HA registers its polyfill stand-in.
@@ -71,6 +71,17 @@ const seasonLabel=value=>{
 const trafficKinds={closure:'Sperrung',landslide:'Erdrutsch',restriction:'Beschränkung',roadworks:'Bauarbeiten'};
 const deadlineLabel=record=>/^\d{4}-\d{2}-\d{2}$/.test(record?.deadline_date||'')?dateFormat(record.deadline_date+'T12:00:00Z',{day:'2-digit',month:'2-digit',year:'numeric'}):'';
 const eventDate=record=>record.start_at||(record.event_date?record.event_date+'T12:00:00+02:00':'');
+const EVENT_TABS={dates:'Termine',preview:'Vorschau',season:'Feste'};
+const monthNames=['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
+const monthCodes=['JAN','FEB','MÄR','APR','MAI','JUN','JUL','AUG','SEP','OKT','NOV','DEZ'];
+const seasonCode=value=>{
+  const label=seasonLabel(value),months=[];
+  for(const match of label.matchAll(/Januar|Februar|März|April|Mai|Juni|Juli|August|September|Oktober|November|Dezember/g))months.push(monthNames.indexOf(match[0]));
+  if(!months.length)for(const match of label.matchAll(/\d{1,2}\.(\d{1,2})\./g)){const month=Number(match[1])-1;if(month>=0&&month<12)months.push(month);}
+  const unique=[...new Set(months)];
+  if(unique.length)return unique.map(m=>monthCodes[m]).join('–');
+  return /Sommer/.test(label)?'SOMMER':label==='Zeitraum nicht angegeben'?'OFFEN':'SAISON';
+};
 const isCinema=record=>{
   if(record.event_type)return record.event_type==='cinema';
   let text=[record.program_title,record.title,record.source_url].filter(Boolean).join(' ');
@@ -80,7 +91,16 @@ const isCinema=record=>{
 };
 
 class ArandjelovacLiveCard extends HTMLElement {
-  constructor(){super();this.attachShadow({mode:'open'});this._states={};this._config={};this._unsubscribe=null;this._timer=null;this._signature='';}
+  constructor(){
+    super();this.attachShadow({mode:'open'});this._states={};this._config={};this._unsubscribe=null;this._timer=null;this._signature='';this._eventTab=null;
+    this.shadowRoot.addEventListener('click',event=>{const tab=event.target.closest?.('button[data-event-tab]');if(tab)this._selectEventTab(tab.dataset.eventTab);});
+    this.shadowRoot.addEventListener('keydown',event=>{
+      const tab=event.target.closest?.('button[data-event-tab]');
+      if(!tab||!['ArrowLeft','ArrowRight','Home','End'].includes(event.key))return;
+      event.preventDefault();const keys=Object.keys(EVENT_TABS),index=keys.indexOf(tab.dataset.eventTab);
+      this._selectEventTab(keys[event.key==='Home'?0:event.key==='End'?keys.length-1:(index+(event.key==='ArrowRight'?1:-1)+keys.length)%keys.length],true);
+    });
+  }
   setConfig(config){
     if(config.entities&&typeof config.entities!=='object')throw Error('entities muss eine Zuordnung von Quelle zu Entitäts-ID sein.');
     this._config={title:'Aranđelovac Live',max_items:8,transliterate:true,...config};
@@ -117,12 +137,15 @@ class ArandjelovacLiveCard extends HTMLElement {
     return `<details data-panel="${esc(key)}" class="panel ${warn?'warning':''}"><summary><span class="symbol">${icon(iconName||PROVIDERS[key]?.icon||'mdi:calendar-month')}</span><span class="copy"><span class="label">${esc(title)}</span><span class="headline">${esc(headline)}</span><span class="meta">${esc(meta)}</span></span>${icon('mdi:chevron-down')}</summary><div class="body">${content}</div></details>`;
   }
   _recordKey(record){return [record._provider||record.source_url||'',record.id||[record.source_url,record.start_at,record.event_date,record.title,record.area].join('|')].join('|');}
-  _description(record){
+  _descriptionText(record){
     if(record.program_split)return '';
     const title=this._text(record.title||'').replace(/\s+/g,' ').trim();
     let description=this._text(record.description||'').replace(/\s+/g,' ').trim();
     if(title.length>20&&description.toLocaleLowerCase().startsWith(title.toLocaleLowerCase())&&(!description[title.length]||/[\s:–—-]/.test(description[title.length])))description=description.slice(title.length).replace(/^[\s:–—-]+/,'');
-    if(!description)return '';
+    return description;
+  }
+  _description(record){
+    const description=this._descriptionText(record);if(!description)return '';
     if([...description].length<=240)return `<div class="description">${esc(description)}</div>`;
     const prefix=[...description].slice(0,240).join(''),space=prefix.lastIndexOf(' ');
     const preview=(space>180?prefix.slice(0,space):prefix)+'…';
@@ -135,6 +158,59 @@ class ArandjelovacLiveCard extends HTMLElement {
     const status=record.kind==='seasonal'?'Saisonhinweis · Jahrestermin offen':record.status==='date_only'?'Datum veröffentlicht · Uhrzeit offen':statuses[record.status]||'Veröffentlichte Meldung';
     const deadline=deadlineLabel(record);
     return `<article class="record"><div class="record-heading">${record._provider?`<span class="event-symbol">${icon(eventIcon(record))}</span>`:''}<div class="record-heading-copy"><div class="when">${esc([type,time].filter(Boolean).join(' · '))}</div><div class="record-title">${esc(this._text(record.title||record.area||'Meldung'))}</div></div></div>${this._description(record)}<span class="tag">${esc(status)}</span>${deadline?`<div class="small">Genannte Frist: ${esc(deadline)}</div>`:''}${record.program_split?'<div class="small">Einzeltermin aus dem veröffentlichten Programm.</div>':''}${record._provider?`<div class="small">${esc(PROVIDERS[record._provider]?.name||'')}</div>`:''}${this._link(record.source_url)}</article>`;
+  }
+  _selectEventTab(key,focus=false){
+    if(!Object.hasOwn(EVENT_TABS,key))return;
+    this._eventTab=key;
+    for(const tab of this.shadowRoot.querySelectorAll('button[data-event-tab]')){
+      const active=tab.dataset.eventTab===key;tab.setAttribute('aria-selected',String(active));tab.tabIndex=active?0:-1;
+      const panel=this.shadowRoot.getElementById(tab.getAttribute('aria-controls'));if(panel)panel.hidden=!active;
+      if(active&&focus)tab.focus({preventScroll:true});
+    }
+  }
+  _eventWhen(record){
+    const date=eventDate(record);
+    return validDate(record.start_at)?`${dayLabel(date)} · ${timeLabel(date)}${validDate(record.end_at)&&record.end_precision!=='date'?'–'+timeLabel(record.end_at):''}`:`${dayLabel(date)} · Uhrzeit offen`;
+  }
+  _eventRecord(record){
+    const seasonal=record.kind==='seasonal',dated=!seasonal&&validDate(eventDate(record)),date=eventDate(record),title=this._text(record.title||'Veranstaltung');
+    const type=eventTypes[eventKind(record)]||(seasonal?'Saisonhinweis':dated?'Veranstaltung':'Kulturmeldung');
+    const source=PROVIDERS[record._provider]?.name||'';
+    const badge=dated?`<time class="calendar" datetime="${esc(dateKey(date))}" aria-label="${esc(dateFormat(date,{weekday:'long',day:'numeric',month:'long',year:'numeric'}))}"><span class="calendar-month">${esc(dateFormat(date,{month:'short'}).replace(/\.$/,'').toUpperCase())}</span><span class="calendar-day">${esc(dateFormat(date,{day:'numeric'}))}</span><span class="calendar-weekday">${esc(dateFormat(date,{weekday:'short'}).replace(/\.$/,'').toUpperCase())}</span></time>`:seasonal?`<span class="season-month">${esc(seasonCode(record.season_label))}</span>`:`<span class="open-date">${icon('mdi:calendar-clock')}<span>OFFEN</span></span>`;
+    const passed=dated&&validDate(record.start_at)&&!validDate(record.end_at)&&Date.parse(record.start_at)<Date.now();
+    const primary=dated?this._eventWhen(record):title;
+    const meta=[type,passed?'Beginn vergangen':dated?source:''].filter(Boolean).join(' · ');
+    const description=this._descriptionText(record),published=dateFormat(record.published_at,{day:'numeric',month:'long',year:'numeric'});
+    let body=`<div class="record-title">${esc(title)}</div>`;
+    if(dated)body+=`<dl class="event-facts"><dt>Wann</dt><dd>${esc(dateFormat(date,{weekday:'long',day:'numeric',month:'long',year:'numeric'}))}${validDate(record.start_at)?' · '+esc(timeLabel(date)):' · Uhrzeit nicht veröffentlicht'}</dd><dt>Quelle</dt><dd>${esc(source)}</dd></dl>`;
+    if(seasonal)body+=`<div class="small">Allgemeine Quellenangabe: ${esc(seasonLabel(record.season_label))}. Jahrestermin nicht bestätigt.</div>`;
+    if(description)body+=`<div class="description">${esc(description)}</div>`;
+    if(record.program_split)body+='<div class="small">Einzeltermin aus dem veröffentlichten Programm.</div>';
+    if(!dated&&!seasonal)body+=`<div class="small">${esc(source)}${published?' · Veröffentlicht am '+esc(published):''}</div>`;
+    if(passed)body+='<div class="small">Beginn vergangen · ein Ende ist damit nicht bestätigt.</div>';
+    body+=this._link(record.source_url);
+    return `<details class="event-record ${seasonal?'season-record':''}" data-panel="${esc('event:'+this._recordKey(record))}"><summary>${badge}<span class="copy"><span class="event-primary">${esc(primary)}</span>${dated?`<span class="event-title">${esc(title)}</span>`:''}<span class="event-type">${icon(eventIcon(record))}${esc(meta)}</span></span>${icon('mdi:chevron-down')}</summary><div class="event-body">${body}</div></details>`;
+  }
+  _events(src){
+    const keys=['kultura','tourism','museum','library','manifestations'],sources=keys.map(key=>src[key]),rows=[],seen=new Set(),today=dateKey(new Date().toISOString());
+    for(const key of keys)for(const record of src[key].items){
+      if(isCinema(record))continue;
+      if(record.kind!=='seasonal'&&validDate(eventDate(record))&&(dateKey(eventDate(record))<today||(validDate(record.end_at)&&Date.parse(record.end_at)<=Date.now())))continue;
+      const id=`${record.source_url}|${eventDate(record)}|${record.title}`;
+      if(!seen.has(id)){seen.add(id);rows.push({...record,_provider:key});}
+    }
+    const groups={dates:rows.filter(r=>r.kind!=='seasonal'&&validDate(eventDate(r))).sort((a,b)=>Date.parse(eventDate(a))-Date.parse(eventDate(b))),preview:rows.filter(r=>r.kind!=='seasonal'&&!validDate(eventDate(r))),season:rows.filter(r=>r.kind==='seasonal')};
+    const healthy=sources.filter(s=>s.healthy).length;
+    const selected=this._eventTab||Object.keys(groups).find(key=>groups[key].length)||'dates';
+    if(healthy&&!this._eventTab)this._eventTab=selected;
+    const tabs=Object.entries(EVENT_TABS).map(([key,label])=>`<button type="button" id="events-tab-${key}" role="tab" aria-controls="events-pane-${key}" aria-selected="${selected===key}" tabindex="${selected===key?0:-1}" data-event-tab="${key}">${esc(label)}<span class="tab-count"${healthy?'':' aria-label="Anzahl unbekannt"'}>${healthy?groups[key].length:'–'}</span></button>`).join('');
+    const labels={dates:'Mit veröffentlichtem Datum',preview:'Kulturmeldungen & Ankündigungen · Termin nicht bestätigt',season:'Allgemeine Saisonübersicht. Genaue Termine für ein bestimmtes Jahr sind nicht bestätigt.'};
+    const empty={dates:'Keine datierten Termine im geladenen Ausschnitt.',preview:'Keine Kulturmeldungen ohne Datum im geladenen Ausschnitt.',season:'Keine Saisonhinweise im geladenen Ausschnitt.'};
+    const panes=Object.keys(EVENT_TABS).map(key=>`<div id="events-pane-${key}" role="tabpanel" aria-labelledby="events-tab-${key}"${selected!==key?' hidden':''}><div class="event-context ${key==='season'?'season-note':''}">${esc(labels[key])}</div>${groups[key].map(record=>this._eventRecord(record)).join('')||`<div class="notice">${esc(healthy?empty[key]:'Veranstaltungsquellen derzeit nicht verfügbar.')}</div>`}</div>`).join('');
+    const failed=keys.filter(key=>!src[key].healthy);
+    const errors=failed.length?`<details class="event-errors" data-panel="event-sources"><summary>${icon('mdi:information-outline')}<span>${failed.length}/${keys.length} Veranstaltungsquellen ${failed.every(key=>src[key].missing)?'nicht eingerichtet':'nicht verfügbar'}</span>${icon('mdi:chevron-down')}</summary><div class="event-body">${failed.map(key=>`<div class="small">${esc(PROVIDERS[key].name)}</div>${this._unavailable(src[key])}`).join('')}</div></details>`:'';
+    const truncated=sources.some(s=>s.a.items_truncated)?'<div class="small">Eine Quelle liefert mehr Meldungen als in ihre Sensorattribute passen. Weitere Informationen stehen im Original.</div>':'';
+    return `<section class="event-module" data-panel="events" aria-labelledby="events-title"><h3 id="events-title" class="module-title">${icon('mdi:calendar-month')}Veranstaltungen</h3><div class="event-tabs" role="tablist" aria-label="Veranstaltungsbereiche">${tabs}</div>${panes}${errors}${truncated}</section>`;
   }
   _trafficHeadline(record){
     const kind=trafficKinds[record.kind]||'Verkehrsmeldung';
@@ -150,8 +226,9 @@ class ArandjelovacLiveCard extends HTMLElement {
     const src=Object.fromEntries(Object.keys(PROVIDERS).map(k=>[k,this._source(k)]));
     const signature=JSON.stringify([this._config,...Object.values(src).map(s=>[s.entity,s.a])]);
     if(!force&&signature===this._signature)return;this._signature=signature;
+    const active=this.shadowRoot.activeElement,focusedTab=active?.dataset?.eventTab,focusedPanel=active?.tagName==='SUMMARY'?active.parentElement?.dataset.panel:null;
     const open=new Set([...this.shadowRoot.querySelectorAll('details[open]')].map(e=>e.dataset.panel));
-    const max=this._config.max_items;let cards='';
+    const max=this._config.max_items;let cards='<h3 class="section-title">Versorgung &amp; Verkehr</h3>';
     const eds=src.eds,first=eds.items[0];
     const coverage=eds.a.coverage_end?dateFormat(eds.a.coverage_end+'T12:00:00+02:00',{day:'numeric',month:'short'}):'';
     let body=eds.healthy?eds.items.slice(0,max).map(record=>this._record({...record,title:record.area,description:'',status:record.status==='laufend'?'in_window':record.status==='geplant'?'scheduled':record.status})).join('')||'<div class="description">Keine noch nicht abgelaufenen Einträge im geprüften Zeitraum.</div>':this._unavailable(eds);
@@ -168,24 +245,8 @@ class ArandjelovacLiveCard extends HTMLElement {
     if(traffic.healthy)body+=`<div class="small">Ortsfilter: ${esc((traffic.a.metadata?.areas||[]).join(', '))}. Eine Meldung ohne bestätigte Aufhebung ist kein gemessener Verkehrszustand.</div>`+this._limit(traffic);
     const trafficFirst=traffic.items.find(i=>i.kind==='closure'&&i.status!=='deadline_passed')||traffic.items.find(i=>i.status!=='deadline_passed')||traffic.items[0];
     cards+=this._panel('putevi','Verkehr · Umgebung'+(traffic.healthy&&traffic.count>1?` · ${traffic.count} Meldungen`:''),traffic.healthy?(trafficFirst?this._trafficHeadline(trafficFirst):'Keine passenden Meldungen'):(traffic.missing?'Quelle nicht eingerichtet':'Quelle nicht verfügbar'),trafficFirst?this._trafficMeta(trafficFirst):'Putevi Srbije',body,{warn:traffic.healthy&&traffic.items.some(i=>i.kind==='closure'&&i.status!=='deadline_passed')});
-    cards+='<div class="section-title">Veranstaltungen &amp; News</div>';
-    const eventKeys=['kultura','tourism','museum','library','manifestations'];
-    const eventSources=eventKeys.map(key=>src[key]),eventRows=[];const seen=new Set();
-    for(const key of eventKeys)for(const i of src[key].items){if(isCinema(i))continue;const id=`${i.source_url}|${eventDate(i)}|${i.title}`;if(!seen.has(id)){seen.add(id);eventRows.push({...i,_provider:key});}}
-    eventRows.sort((a,b)=>(!eventDate(a))-(!eventDate(b))||eventDate(a).localeCompare(eventDate(b)));
-    const dated=eventRows.filter(i=>eventDate(i)),announcements=eventRows.filter(i=>!eventDate(i)&&i.kind!=='seasonal'),seasonal=eventRows.filter(i=>i.kind==='seasonal');
-    const upcoming=dated.find(i=>i.event_date?dateKey(eventDate(i))>=dateKey(new Date().toISOString()):Date.parse(i.start_at)>Date.now());
-    const healthyEvents=eventSources.filter(s=>s.healthy).length;
-    body=dated.length?`<h3 class="event-group">${icon('mdi:calendar-clock')}Veröffentlichte Termine</h3>`+dated.map(i=>this._record(i)).join(''):'';
-    if(announcements.length)body+=`<h3 class="event-group">${icon('mdi:bullhorn-outline')}Kulturmeldungen &amp; Ankündigungen</h3>`+announcements.map(i=>this._record(i)).join('');
-    if(seasonal.length)body+=`<details class="seasonal-group" data-panel="event-seasonal"><summary><span class="event-symbol">${icon('mdi:store-outline')}</span><span class="copy"><span class="record-title">Feste &amp; Basare · Saisonübersicht</span><span class="meta">${seasonal.length} ${seasonal.length===1?'Eintrag':'Einträge'} · Jahrestermine offen</span></span>${icon('mdi:chevron-down')}</summary><div class="seasonal-body"><div class="small">Allgemeine Angaben der Tourismusorganisation. Genaue Termine für ein bestimmtes Jahr sind hier nicht bestätigt.</div>${seasonal.map(i=>this._record(i)).join('')}</div></details>`;
-    if(!eventRows.length&&healthyEvents)body='<div class="description">Keine passenden Termine oder Meldungen im geprüften Zeitraum.</div>';
-    for(const key of eventKeys)if(!src[key].healthy)body+=`<div class="small">${esc(PROVIDERS[key].name)}</div>${this._unavailable(src[key])}`;
-    if(eventSources.some(s=>s.a.items_truncated))body+='<div class="small">Eine Quelle liefert mehr Meldungen als in ihre Sensorattribute passen. Weitere Informationen stehen im Original.</div>';
-    const preview=announcements[0]||seasonal[0];
-    const eventHeadline=upcoming?`${eventTypes[upcoming.event_type]||'Veranstaltung'} · ${dayLabel(eventDate(upcoming))}${upcoming.event_date?'':', '+timeLabel(upcoming.start_at)}`:preview?this._text(preview.title):healthyEvents?'Termine & Meldungen':'Quellen nicht verfügbar';
-    const eventMeta=upcoming?this._text(upcoming.title):preview?(preview.kind==='seasonal'?'Saisonhinweis · genauer Jahrestermin offen':'Meldung / Ankündigung · Termin noch offen'):`${healthyEvents}/${eventKeys.length} Quellen auswertbar`;
-    cards+=this._panel('events','Kultur & Veranstaltungen',eventHeadline,eventMeta,body,{iconName:eventIcon(upcoming||preview)});
+    cards+=this._events(src);
+    cards+='<h3 class="section-title">Nachrichten aus der Gemeinde</h3>';
     const news=src.opstina;
     body=news.healthy?news.items.slice(0,max).map(i=>this._record(i)).join('')||'<div class="description">Keine Gemeindemeldungen im Anzeigezeitraum.</div>':this._unavailable(news);
     if(news.healthy)body+=this._limit(news);
@@ -194,10 +255,26 @@ class ArandjelovacLiveCard extends HTMLElement {
     const health=Object.entries(src).map(([key,s])=>`<div class="provider"><span>${esc(PROVIDERS[key].name)}</span><span class="provider-state ${s.healthy?'good':''}">${icon(s.healthy?'mdi:check-circle-outline':'mdi:help-circle-outline')}${esc(s.healthy?ago(s.a.last_success):s.missing?'Nicht eingerichtet':'Nicht verfügbar')}</span></div>`).join('');
     this.shadowRoot.innerHTML=`<style>
       :host{display:block;--ar-text:var(--primary-text-color,#253448);--ar-sub:var(--secondary-text-color,#647488);--ar-surface:var(--ha-card-background,var(--card-background-color,#fff));--ar-line:var(--divider-color,#e3e8ef);--ar-accent:var(--primary-color,#3678bb);--ar-warn:color-mix(in srgb,var(--warning-color,#d39b25) 65%,var(--ar-text));--ar-good:color-mix(in srgb,var(--success-color,#438664) 55%,var(--ar-text))}
-      *{box-sizing:border-box}ha-card{display:block;padding:17px 14px 13px;background:var(--ar-surface);color:var(--ar-text);font-family:var(--primary-font-family,Roboto,Arial,sans-serif);font-size:14px;line-height:1.5}h2{font-size:24px;font-weight:500;letter-spacing:-.5px;margin:3px 0 4px}.kicker{display:flex;gap:5px;align-items:center;font-size:12px;color:var(--ar-sub)}.kicker ha-icon{--mdc-icon-size:14px}.intro{font-size:13px;color:var(--ar-sub);margin-bottom:13px}.panel{background:var(--ar-surface);border:1px solid var(--ar-line);border-radius:14px;margin-bottom:9px;overflow:hidden}summary{display:flex;align-items:flex-start;gap:10px;min-height:72px;padding:12px;list-style:none;cursor:pointer}summary::-webkit-details-marker{display:none}.symbol{flex:0 0 34px;height:34px;border-radius:10px;display:grid;place-items:center;background:color-mix(in srgb,var(--ar-accent) 12%,var(--ar-surface));color:var(--ar-accent)}.symbol ha-icon{--mdc-icon-size:20px}.copy{display:flex;flex:1;min-width:0;flex-direction:column;gap:2px}.label,.meta{color:var(--ar-sub);font-size:12px}.headline{font-size:15px;font-weight:500;overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}.meta{overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}summary>ha-icon{--mdc-icon-size:17px;flex:0 0 17px;margin-top:13px;color:var(--ar-sub);transition:transform .15s}details[open]>summary>ha-icon{transform:rotate(180deg)}.warning{border-color:var(--ar-warn);box-shadow:inset 3px 0 0 var(--ar-warn)}.warning .symbol{background:color-mix(in srgb,var(--ar-warn) 10%,var(--ar-surface));color:var(--ar-warn)}.body{padding:0 14px 15px}.body:before{content:'';display:block;border-top:1px solid var(--ar-line);margin-bottom:13px}.event-group{font-size:13px;font-weight:500;margin:18px 0 12px;color:var(--ar-sub)}.record{margin-bottom:17px}.record:last-child{margin-bottom:0}.when{color:var(--ar-sub);font-size:12px;margin-bottom:4px}.record-title{font-weight:500;overflow-wrap:anywhere}.description{font-size:13px;color:var(--ar-sub);margin-top:5px;white-space:pre-line;overflow-wrap:anywhere}.source{display:flex;align-items:center;gap:5px;width:fit-content;min-height:44px;font-size:12px;color:var(--ar-accent);text-decoration:none}.source:hover{text-decoration:underline}.source ha-icon{--mdc-icon-size:13px}.tag{display:inline-block;margin-top:7px;padding:3px 7px;border-radius:6px;background:color-mix(in srgb,var(--ar-accent) 9%,var(--ar-surface));font-size:11px}.small{font-size:12px;color:var(--ar-sub);margin-top:8px;overflow-wrap:anywhere}.notice{font-size:13px;color:var(--ar-sub)}.section-title{margin:19px 2px 10px;font-size:13px;color:var(--ar-sub);font-weight:500}.health summary{align-items:center;min-height:52px;padding:12px;gap:8px}.health summary>ha-icon{margin:0}.health-label{flex:1;font-size:12px;color:var(--ar-sub)}.health-count{font-size:12px;color:var(--ar-text);text-align:right}.provider{display:flex;justify-content:space-between;gap:8px;padding:9px 0;border-bottom:1px solid var(--ar-line);font-size:12px}.provider:last-child{border:0}.provider-state{display:flex;gap:4px;align-items:center;text-align:right;color:var(--ar-sub)}.provider-state ha-icon{--mdc-icon-size:14px;flex:0 0 14px}.good{color:var(--ar-text)}.good ha-icon{color:var(--ar-good)}.footer{font-size:11px;color:var(--ar-sub);margin:9px 2px 0}@media(max-width:350px){ha-card{padding:14px 10px}.provider{flex-direction:column;gap:2px}summary{padding:11px 10px;gap:9px}.headline{font-size:14px}}@media(prefers-reduced-motion:reduce){summary>ha-icon{transition:none}}
-      .event-group{display:flex;align-items:center;gap:7px}.event-group ha-icon{--mdc-icon-size:18px;flex:0 0 18px;color:var(--ar-accent)}.record-heading{display:flex;gap:9px;align-items:flex-start}.record-heading-copy{flex:1;min-width:0}.event-symbol{display:grid;place-items:center;flex:0 0 30px;width:30px;height:30px;border-radius:8px;background:color-mix(in srgb,var(--ar-accent) 9%,var(--ar-surface));color:var(--ar-accent)}.event-symbol ha-icon{--mdc-icon-size:18px}.seasonal-group{border:1px solid var(--ar-line);border-radius:10px;margin-top:16px}.seasonal-group>summary{min-height:62px;padding:10px;align-items:center;gap:8px}.seasonal-group>summary>ha-icon{margin:0}.seasonal-body{padding:0 10px 10px}.seasonal-body>.small:first-child{margin:0 0 14px}.description-toggle{margin-top:5px}.description-toggle>summary{display:block;min-height:0;padding:0}.description-preview{display:block;font-size:13px;color:var(--ar-sub);overflow-wrap:anywhere}.read-more{display:flex;gap:5px;align-items:center;min-height:44px;font-size:12px;color:var(--ar-accent)}.read-more ha-icon{--mdc-icon-size:15px}.description-toggle .less{display:none}.description-toggle[open] .description-preview,.description-toggle[open] .more{display:none}.description-toggle[open] .less{display:inline}.description-toggle[open] .read-more ha-icon{transform:rotate(180deg)}.description-toggle>.description{margin-top:0}summary:focus-visible,a:focus-visible{outline:2px solid var(--ar-accent);outline-offset:2px;border-radius:4px}
+      *{box-sizing:border-box}ha-card{display:block;padding:17px 14px 13px;background:var(--ar-surface);color:var(--ar-text);font-family:var(--primary-font-family,Roboto,Arial,sans-serif);font-size:14px;line-height:1.5}h2{font-size:24px;font-weight:500;letter-spacing:-.5px;margin:3px 0 4px}.kicker{display:flex;gap:5px;align-items:center;font-size:12px;color:var(--ar-sub)}.kicker ha-icon{--mdc-icon-size:14px}.intro{font-size:13px;color:var(--ar-sub);margin-bottom:13px}.panel{background:var(--ar-surface);border:1px solid var(--ar-line);border-radius:14px;margin-bottom:9px;overflow:hidden}summary{display:flex;align-items:flex-start;gap:10px;min-height:72px;padding:12px;list-style:none;cursor:pointer}summary::-webkit-details-marker{display:none}.symbol{flex:0 0 34px;height:34px;border-radius:10px;display:grid;place-items:center;background:color-mix(in srgb,var(--ar-accent) 12%,var(--ar-surface));color:var(--ar-accent)}.symbol ha-icon{--mdc-icon-size:20px}.copy{display:flex;flex:1;min-width:0;flex-direction:column;gap:2px}.label,.meta{color:var(--ar-sub);font-size:12px}.headline{font-size:15px;font-weight:500;overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}.meta{overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}summary>ha-icon{--mdc-icon-size:17px;flex:0 0 17px;margin-top:13px;color:var(--ar-sub);transition:transform .15s}details[open]>summary>ha-icon{transform:rotate(180deg)}.warning{border-color:var(--ar-warn);box-shadow:inset 3px 0 0 var(--ar-warn)}.warning .symbol{background:color-mix(in srgb,var(--ar-warn) 10%,var(--ar-surface));color:var(--ar-warn)}.body{padding:0 14px 15px}.body:before{content:'';display:block;border-top:1px solid var(--ar-line);margin-bottom:13px}.record{margin-bottom:17px}.record:last-child{margin-bottom:0}.when{color:var(--ar-sub);font-size:12px;margin-bottom:4px}.record-title{font-weight:500;overflow-wrap:anywhere}.description{font-size:13px;color:var(--ar-sub);margin-top:5px;white-space:pre-line;overflow-wrap:anywhere}.source{display:flex;align-items:center;gap:5px;width:fit-content;min-height:44px;font-size:12px;color:var(--ar-accent);text-decoration:none}.source:hover{text-decoration:underline}.source ha-icon{--mdc-icon-size:13px}.tag{display:inline-block;margin-top:7px;padding:3px 7px;border-radius:6px;background:color-mix(in srgb,var(--ar-accent) 9%,var(--ar-surface));font-size:11px}.small{font-size:12px;color:var(--ar-sub);margin-top:8px;overflow-wrap:anywhere}.notice{font-size:13px;color:var(--ar-sub)}.section-title{margin:19px 2px 10px;font-size:13px;color:var(--ar-sub);font-weight:500}.health summary{align-items:center;min-height:52px;padding:12px;gap:8px}.health summary>ha-icon{margin:0}.health-label{flex:1;font-size:12px;color:var(--ar-sub)}.health-count{font-size:12px;color:var(--ar-text);text-align:right}.provider{display:flex;justify-content:space-between;gap:8px;padding:9px 0;border-bottom:1px solid var(--ar-line);font-size:12px}.provider:last-child{border:0}.provider-state{display:flex;gap:4px;align-items:center;text-align:right;color:var(--ar-sub)}.provider-state ha-icon{--mdc-icon-size:14px;flex:0 0 14px}.good{color:var(--ar-text)}.good ha-icon{color:var(--ar-good)}.footer{font-size:11px;color:var(--ar-sub);margin:9px 2px 0}@media(max-width:350px){ha-card{padding:14px 10px}.provider{flex-direction:column;gap:2px}summary{padding:11px 10px;gap:9px}.headline{font-size:14px}}@media(prefers-reduced-motion:reduce){summary>ha-icon{transition:none}}
+      .record-heading{display:flex;gap:9px;align-items:flex-start}.record-heading-copy{flex:1;min-width:0}.event-symbol{display:grid;place-items:center;flex:0 0 30px;width:30px;height:30px;border-radius:8px;background:color-mix(in srgb,var(--ar-accent) 9%,var(--ar-surface));color:var(--ar-accent)}.event-symbol ha-icon{--mdc-icon-size:18px}.description-toggle{margin-top:5px}.description-toggle>summary{display:block;min-height:0;padding:0}.description-preview{display:block;font-size:13px;color:var(--ar-sub);overflow-wrap:anywhere}.read-more{display:flex;gap:5px;align-items:center;min-height:44px;font-size:12px;color:var(--ar-accent)}.read-more ha-icon{--mdc-icon-size:15px}.description-toggle .less{display:none}.description-toggle[open] .description-preview,.description-toggle[open] .more{display:none}.description-toggle[open] .less{display:inline}.description-toggle[open] .read-more ha-icon{transform:rotate(180deg)}.description-toggle>.description{margin-top:0}summary:focus-visible,a:focus-visible{outline:2px solid var(--ar-accent);outline-offset:2px;border-radius:4px}
+      .section-title{font-size:15px;font-weight:500;line-height:1.35;margin:22px 2px 11px}.section-title:first-of-type{margin-top:17px}
+      .event-module{--ar-row:color-mix(in srgb,var(--ar-text) 4%,var(--ar-surface));border:1px solid var(--ar-line);border-radius:14px;padding:14px 11px 11px;margin:22px 0 18px}
+      .module-title{display:flex;align-items:center;gap:8px;margin:0 1px 13px;font-size:18px;font-weight:500;line-height:1.3}.module-title ha-icon{--mdc-icon-size:21px;color:var(--ar-accent);flex:0 0 21px}
+      .event-tabs{display:flex;gap:4px;background:color-mix(in srgb,var(--ar-accent) 12%,var(--ar-surface));padding:4px;border-radius:10px}
+      .event-tabs button{display:flex;align-items:center;justify-content:center;gap:5px;flex:1;min-width:0;min-height:44px;padding:8px 4px;border:0;border-radius:7px;background:transparent;color:var(--ar-text);font:500 12px/1.4 var(--primary-font-family,Roboto,Arial,sans-serif);cursor:pointer}
+      .event-tabs button[aria-selected="true"]{background:var(--ar-text);color:var(--ar-surface)}.tab-count{display:inline-grid;place-items:center;min-width:17px;min-height:18px;padding:0 4px;border-radius:5px;background:color-mix(in srgb,currentColor 12%,transparent);font-size:11px;font-weight:400}
+      .event-module [hidden]{display:none!important}.event-context{font-size:12px;color:var(--ar-sub);margin:13px 2px 9px}.season-note{padding:9px;border-radius:8px;background:var(--ar-row)}
+      .event-record{border:1px solid var(--ar-line);border-radius:11px;background:var(--ar-row);overflow:hidden;margin-top:8px}.event-record>summary{align-items:center;gap:10px;padding:12px 10px;min-height:84px}.event-record>summary>ha-icon{margin:0;--mdc-icon-size:16px;flex-basis:16px}
+      .calendar{display:flex;flex-direction:column;align-items:center;flex:0 0 49px;width:49px;overflow:hidden;border:1px solid var(--ar-line);border-radius:8px;background:var(--ar-surface);font-style:normal}.calendar-month{align-self:stretch;padding:3px 2px;background:color-mix(in srgb,var(--ar-accent) 12%,var(--ar-surface));color:var(--ar-sub);font-size:11px;text-align:center;letter-spacing:.7px;font-weight:500}.calendar-day{padding:3px 2px 0;font-size:25px;line-height:1.1;font-weight:500}.calendar-weekday{padding-bottom:4px;color:var(--ar-sub);font-size:11px}
+      .event-primary{font-size:15px;font-weight:500;line-height:1.35}.event-title{font-size:14px;line-height:1.4}.event-primary,.event-title{overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}.event-type{display:flex;align-items:center;gap:5px;color:var(--ar-sub);font-size:11px;margin-top:3px;overflow-wrap:anywhere}.event-type ha-icon{--mdc-icon-size:14px;flex:0 0 14px;color:var(--ar-accent)}
+      .open-date{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;flex:0 0 49px;height:61px;border-radius:8px;background:var(--ar-surface);color:var(--ar-accent)}.open-date ha-icon{--mdc-icon-size:23px}.open-date span{font-size:11px;color:var(--ar-sub)}.season-month{display:grid;place-items:center;flex:0 0 49px;min-height:34px;padding:5px 1px;border-radius:6px;background:var(--ar-surface);color:var(--ar-sub);font-size:11px;font-weight:500;text-align:center;overflow-wrap:anywhere}.season-record>summary{min-height:65px;padding:10px}.season-record .event-primary{font-size:13px}
+      .event-body{margin:0 11px;padding:12px 0;border-top:1px solid var(--ar-line)}.event-body>.record-title{font-size:14px}.event-facts{display:grid;grid-template-columns:55px minmax(0,1fr);gap:6px 9px;font-size:12px;margin:12px 0}.event-facts dt{color:var(--ar-sub)}.event-facts dd{margin:0;overflow-wrap:anywhere}
+      .event-errors{margin-top:12px;border-top:1px solid var(--ar-line)}.event-errors>summary{align-items:center;min-height:44px;padding:8px 0;gap:7px;font-size:12px;color:var(--ar-sub)}.event-errors>summary>ha-icon{margin:0;--mdc-icon-size:16px;flex:0 0 16px}.event-errors>summary>span{flex:1}.event-errors .event-body{margin:0}
+      button:focus-visible{outline:2px solid var(--ar-accent);outline-offset:2px}@media(max-width:350px){.event-module{padding:12px 8px 10px}.event-tabs button{gap:3px;padding:8px 2px}.event-record>summary{padding:11px 8px;gap:8px}.calendar,.open-date,.season-month{flex-basis:43px;width:43px}.event-primary{font-size:14px}}
     </style><ha-card><div class="kicker">${icon('mdi:map-marker-outline')}Stadt &amp; Umgebung</div><h2>${esc(this._config.title)}</h2><div class="intro">${esc(dateFormat(new Date().toISOString(),{weekday:'long',day:'numeric',month:'long'}))} · Gemeindeweit</div>${cards}<details class="panel health" data-panel="sources"><summary>${icon('mdi:information-outline')}<span class="health-label">Quellen &amp; Aktualität</span><span class="health-count">${healthy}/${Object.keys(PROVIDERS).length} Quellen erreichbar</span>${icon('mdi:chevron-down')}</summary><div class="body">${health}</div></details><div class="footer">Zeiten in Europe/Belgrade · Öffentliche Meldungen</div></ha-card>`;
     for(const details of this.shadowRoot.querySelectorAll('details'))if(open.has(details.dataset.panel))details.open=true;
+    if(focusedTab)this.shadowRoot.querySelector(`button[data-event-tab="${focusedTab}"]`)?.focus({preventScroll:true});
+    else if(focusedPanel)[...this.shadowRoot.querySelectorAll('details')].find(d=>d.dataset.panel===focusedPanel)?.querySelector(':scope > summary')?.focus({preventScroll:true});
   }
 }
 if(!customElements.get('arandjelovac-live-card'))customElements.define('arandjelovac-live-card',ArandjelovacLiveCard);

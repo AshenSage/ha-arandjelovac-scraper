@@ -167,7 +167,8 @@ async def test_all_sources_real_setup_http_card_and_independence(hass,freezer,ha
         client=await hass_client()
         response=await client.get('/arandjelovac_live/arandjelovac-live-card.js')
         assert response.status==200
-        assert 'Veranstaltungen &amp; News' in await response.text()
+        card_code=await response.text()
+        assert 'data-event-tab' in card_code and 'calendar-day' in card_code
         with patch.object(coordinators['jkp'].provider,'async_fetch',side_effect=SourceError('network','Offline')):
             await coordinators['jkp'].async_refresh()
             await hass.async_block_till_done()
