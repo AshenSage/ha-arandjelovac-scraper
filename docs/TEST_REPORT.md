@@ -1,4 +1,4 @@
-# Prüfbericht · Aranđelovac Live 1.3.0
+# Prüfbericht · Aranđelovac Live 1.3.1
 
 Stand: 14.10.2026. Geprüftes Laufzeitziel: Home Assistant Core 2026.10.1, Python 3.14.2.
 
@@ -10,7 +10,7 @@ Stand: 14.10.2026. Geprüftes Laufzeitziel: Home Assistant Core 2026.10.1, Pytho
 | Zusätzliche Quellen-, Datums-, Status-, Programm- und Budgetprüfungen | 59 Tests erfolgreich |
 | Gesamte Offline-Python-Suite | 168 Tests erfolgreich |
 | Reale HA-Core-Tests | 17 Tests erfolgreich |
-| Chromium-Karte | 294 Assertions erfolgreich, keine JavaScript-Fehler |
+| Chromium-Karte | 473 Assertions erfolgreich, keine JavaScript-Fehler |
 | Bildschirmbreiten | 320, 440 und 736 px, jeweils helles, dunkles und grünes Theme |
 | Struktur/Syntax | Python compileall, JavaScript node --check, JSON, Versionsabgleich und Paketstruktur erfolgreich |
 | Live-Quellen | Alle neun Provider verfügbar; Details in live-verification.json |
@@ -39,7 +39,7 @@ Die 219 Browserprüfungen umfassen drei Themes mit drei Breiten sowie Warnungen 
 
 ## Nach Installation noch ausstehend
 
-Für 1.2.1 bestätigen die vom Nutzer gezeigten Smartphone-Screenshots eine geladene Karte nach manueller Ressourcenregistrierung und sechs erfolgreiche Quellenabrufe. Die späteren Smartphone-Screenshots bestätigen auch die Darstellung von 1.2.2. Die Abnahme von Version 1.3.0 auf dem tatsächlichen HA-System steht aus. Es wurde keine Verbindung zu seiner produktiven HA-Instanz hergestellt und dort nichts geändert.
+Für 1.2.1 bestätigen die vom Nutzer gezeigten Smartphone-Screenshots eine geladene Karte nach manueller Ressourcenregistrierung und sechs erfolgreiche Quellenabrufe. Die späteren Smartphone-Screenshots bestätigen auch die Darstellung von 1.2.2. Die weiteren Smartphone-Screenshots vom 14.10.2026 bestätigen Version 1.3.0 mit neun erreichbaren Quellen, einer datierten Lesung, einer getrennten Theaterankündigung und den Saisonhinweisen ohne Kino. Die produktive Abnahme von Version 1.3.1 steht noch aus. Es wurde keine Verbindung zu seiner produktiven HA-Instanz hergestellt und dort nichts geändert.
 
 RSS-Ausschnitte bleiben begrenzt; Bildbeiträge werden nicht per OCR gelesen. Kein Artikelstatus ersetzt eine Messung der Versorgung im Haus. Diese fachlichen Grenzen werden in Karte und README ausdrücklich ausgewiesen.
 
@@ -52,3 +52,14 @@ Neue Regressionen prüfen datierte Termine ohne Uhrzeit, vergangene Termine, Anm
 Der echte HA-Upgrade-Test ergänzt ausschliesslich Museum, Bibliothek und Feste/Basare zu den sechs vorhandenen Quellen. Die bestehenden ConfigEntry-Objekte bleiben erhalten. Einrichtung aller neun Quellen, 18 Sensoren und Ausfall einer einzelnen Quelle werden ebenfalls im echten HA Core geprüft.
 
 Die drei zusätzlichen öffentlichen Quellen wurden mit dem produktiven HTTP- und Parserpfad live geprüft: Museum liefert aktuell keine Meldung im konfigurierten Zeitraum; die Bibliothek einen Termin am 15.10.2026 um 19:00; die Tourismusübersicht 13 allgemeine Saisonhinweise. Das sind Momentaufnahmen des Abrufs vom 14.10.2026, kein Anspruch auf einen vollständigen lokalen Veranstaltungskalender. Rohantworten bleiben lokale Recherchedateien; der veröffentlichte Bericht enthält Abrufmetadaten statt vollständiger fremder Artikel.
+
+
+## Kompakte Anzeige und Veranstaltungsicons · Version 1.3.1
+
+473 Browser-Assertions prüfen weiterhin drei Themes und die Breiten 320, 440 und 736 px. Neu abgedeckt sind die eigene geschlossene Saisonübersicht, das unabhängige Öffnen dieser Liste, deutsche Saisonmonate einschliesslich kyrillischer Monatsangaben und weiterhin fehlende erfundene Jahreszahlen. Veröffentlichungsdaten von Ankündigungen und Gemeindemeldungen werden ausdrücklich als solche bezeichnet.
+
+Lange Texte werden per nativem Details-Element geöffnet und geschlossen; die Vorschau zeigt weder die wiederholte Überschrift noch den gesamten Text. Tastaturbedienung mit Enter, der Wechsel zwischen Mehr/Weniger anzeigen sowie der Erhalt der geöffneten Text- und Saisonbereiche bei neuen Sensorständen und erzwungenem Minutenrendern werden tatsächlich im Browser ausgeführt. Fremde HTML-Fragmente in langen Texten und Datensatz-IDs bleiben auch nach dem Öffnen Text; unsichere Links werden nicht ausgegeben.
+
+Alle sechs Veranstaltungsarten erhalten unterschiedliche Symbole. Der Hauptbereich wechselt beim nächsten Theatertermin bzw. Markttermin zum passenden Icon. Ein Test im realen HA Core prüft sämtliche verwendeten MDI-Namen gegen den ausgelieferten Katalog. Eine zusätzliche lokale Sichtprüfung verwendet dessen tatsächliche SVG-Pfade mit erfassten Quelldaten im grünen Theme; weder die geschlossene Karte noch geöffnete Veranstaltungs-, Saison-, Nachrichten- oder Quellenbereiche laufen bei den drei geprüften Breiten horizontal über.
+
+Die unveränderte Python-Suite besteht mit 168 Tests, die reale HA-Suite mit 17 Tests. Versionsabgleich, Paketprüfung und Python-/JavaScript-Syntaxprüfung bestehen ebenfalls. Diese Version ändert ausschliesslich die Darstellung und die Paketversion; ein erneuter Live-Abruf der unveränderten Quellenparser ist dafür nicht erforderlich. Die vorhandenen Live-Ergebnisse sind weiterhin mit ihrem tatsächlichen Abrufzeitpunkt dokumentiert.

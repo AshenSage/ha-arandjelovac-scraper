@@ -1,3 +1,3 @@
 """Integration identity and release."""
 DOMAIN = "arandjelovac_live"
-VERSION = "1.3.0"
+VERSION = "1.3.1"

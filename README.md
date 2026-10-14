@@ -27,10 +27,10 @@ Falls die Karte nach dem Neustart noch nicht erkannt wird:
 
 1. Unter **Einstellungen → Geräte & Dienste** prüfen, ob **Aranđelovac Live** eingerichtet ist. Ein Download in HACS allein aktiviert die Integration noch nicht.
 2. HA vollständig neu starten und anschliessend die HA-Seite beziehungsweise App neu laden.
-3. Nur bei weiter bestehendem Fehler unter **Dashboards → Ressourcen** diese URL als **JavaScript-Modul** ergänzen: `/arandjelovac_live/arandjelovac-live-card.js?v=1.3.0`. Falls der Menüpunkt fehlt, im Benutzerprofil den erweiterten Modus einschalten.
+3. Nur bei weiter bestehendem Fehler unter **Dashboards → Ressourcen** diese URL als **JavaScript-Modul** ergänzen: `/arandjelovac_live/arandjelovac-live-card.js?v=1.3.1`. Falls der Menüpunkt fehlt, im Benutzerprofil den erweiterten Modus einschalten.
 4. Liefert dieselbe URL beim direkten Öffnen eine 404-Seite, ist die Integration noch nicht geladen. Dann zuerst die Integrationsseite und HA-Protokolle prüfen; eine Ressourcenregistrierung behebt keinen fehlenden HTTP-Pfad.
 
-Bei einer bereits manuell eingetragenen Ressource deren URL nach dem Update auf `?v=1.3.0` ändern und die HA-Seite beziehungsweise App neu laden. Den bestehenden Eintrag bearbeiten, keine zweite Ressource hinzufügen. Die Karten-YAML und Entitäts-IDs bleiben erhalten.
+Bei einer bereits manuell eingetragenen Ressource deren URL nach dem Update auf `?v=1.3.1` ändern und die HA-Seite beziehungsweise App neu laden. Den bestehenden Eintrag bearbeiten, keine zweite Ressource hinzufügen. Die Karten-YAML und Entitäts-IDs bleiben erhalten.
 
 Die Karte zeigt kompakte Verkehrszusammenfassungen mit ausdrücklich genannter Strecke, Ort und Frist. Warnungen verwenden einen farbigen Rand auf der normalen Kartenfläche. Wassertexte nennen Meldungen und weisen auf Bildbeiträge hin. Kino ist in der Dashboardkarte ausgeblendet. Theater, Konzerte, Ausstellungen, Lesungen und andere Kulturmeldungen bleiben sichtbar. Einzeltermine aus Programmen verlinken auf das Original, statt den gesamten Wochenplan zu wiederholen. **9/9 Quellen erreichbar** bezeichnet erfolgreiche, noch aktuelle Quellenabrufe und keine bestätigte Versorgung im Haus.
 
@@ -99,9 +99,17 @@ Unter **Geräte & Dienste → Aranđelovac Live → Quelle → Konfigurieren** l
 
 Die lokale Minutenprüfung aktualisiert Ablauf und Quellenfrische ohne zusätzliche HTTP-Anfrage. Standard-Anzeigezeitraum: 30 Tage, Veranstaltungshorizont: 60 Tage. Fehler führen zu keinem sofortigen Retry-Sturm. Ein manueller Abruf ist über `homeassistant.update_entity` auf dem Hauptsensor möglich.
 
+## Update von Version 1.3.0
+
+In HACS auf **1.3.1** aktualisieren und HA neu starten. Die vorhandene manuelle Dashboard-Ressource auf `?v=1.3.1` ändern und die HA-Seite bzw. App neu laden. Bereits eingerichtete Quellen bleiben erhalten; der Einrichtungsdialog muss nicht erneut durchlaufen werden.
+
+Lange Meldungstexte zeigen eine kurze Vorschau mit **Mehr anzeigen / Weniger anzeigen**. Ein am Textanfang wiederholter vollständiger Titel wird ausgeblendet. Die Saisonübersicht ist innerhalb des Veranstaltungsbereichs separat zugeklappt. Geöffnete Texte und Bereiche bleiben bei Daten- und Minutenupdates geöffnet. Veröffentlichungsdaten heissen ausdrücklich **Veröffentlicht am**; Veranstaltungsdaten behalten ihre eigene Anzeige.
+
+Veranstaltungsarten haben eigene Symbole: Theatermasken, Musiknote, Farbpalette, Buch, Marktstand und Festivaldekoration. Die Vorschau übernimmt das Symbol des nächsten Termins. Saisonmonate erscheinen auf Deutsch, ohne daraus einen Jahrestermin abzuleiten. Artikeltexte und Titel bleiben in der Quellsprache; `transliterate` steuert weiterhin nur die Schrift.
+
 ## Update von Version 1.2.x
 
-Nach HACS-Update und HA-Neustart unter **Einstellungen → Geräte & Dienste → Integration hinzufügen → Aranđelovac Live → Komplettpaket · alle 9 Quellen** wählen. Dadurch werden nur Museum, Bibliothek und Feste/Basare ergänzt. Die bisherigen sechs Einträge bleiben erhalten. Anschliessend die bestehende manuelle Dashboard-Ressource auf `?v=1.3.0` aktualisieren und die HA-Seite neu laden. Die Karten-YAML bleibt gültig.
+Nach HACS-Update und HA-Neustart unter **Einstellungen → Geräte & Dienste → Integration hinzufügen → Aranđelovac Live → Komplettpaket · alle 9 Quellen** wählen. Dadurch werden nur Museum, Bibliothek und Feste/Basare ergänzt. Die bisherigen sechs Einträge bleiben erhalten. Anschliessend die bestehende manuelle Dashboard-Ressource auf `?v=1.3.1` aktualisieren und die HA-Seite neu laden. Die Karten-YAML bleibt gültig.
 
 ## Update von Version 1.1.0
 
@@ -136,4 +144,4 @@ python tools/sources_probe.py --live
 
 Die Option `--proxy-env` gilt ausschliesslich für Entwicklungsumgebungen mit vorgegebenem Proxy. Die laufende Integration verwendet die HA-HTTP-Session. Live-Captures gehören nicht ins öffentliche Repository.
 
-Prüfstand und verbleibende Abnahme: [docs/TEST_REPORT.md](docs/TEST_REPORT.md). Die Prüfung in Nenads produktiver HA-Instanz folgt nach Installation.
+Prüfstand und verbleibende Abnahme: [docs/TEST_REPORT.md](docs/TEST_REPORT.md). Die Smartphone-Screenshots bestätigen Version 1.3.0 mit neun erreichbaren Quellen; die Darstellung von 1.3.1 wird nach Installation geprüft.

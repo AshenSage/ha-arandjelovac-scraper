@@ -21,7 +21,9 @@ states['sensor.arandjelovac_kultura'].state=String(states['sensor.arandjelovac_k
 add('museum',[]);
 add('library',[{id:'reading',title:'Lesung im November',event_date:'2026-11-02',kind:'event',event_type:'reading',status:'date_only',published_at:now.toISOString(),source_url:'https://www.nbssa.rs/lesung/'}]);
 add('manifestations',[{id:'market',title:'Novogodišnji bazar',kind:'seasonal',status:'seasonal',season_label:'decembar',date_confirmed:false,source_url:'https://bukovickabanja.rs/bazar/'}]);
-add('tourism',[]);add('opstina',[{title:'News',description:'Information',status:'published',source_url:'https://arandjelovac.rs/'}]);
+const newsTitle='Gemeindemeldung mit einer längeren Überschrift';
+const longDescription='Zusätzliche Informationen aus der öffentlichen Quelle. '.repeat(12)+'ENDE_DES_LANGEN_TEXTES';
+add('tourism',[]);add('opstina',[{id:'news',title:newsTitle,description:newsTitle+' '+longDescription,status:'published',published_at:now.toISOString(),source_url:'https://arandjelovac.rs/'}]);
 (async()=>{
  const browser=await chromium.launch({headless:true,args:['--no-sandbox'],...(process.env.PLAYWRIGHT_EXECUTABLE_PATH?{executablePath:process.env.PLAYWRIGHT_EXECUTABLE_PATH}:{})});
  const page=await browser.newPage();await page.clock.install({time:now});const errors=[];page.on('pageerror',e=>errors.push(e.message));
@@ -64,6 +66,7 @@ add('tourism',[]);add('opstina',[{title:'News',description:'Information',status:
   assert.doesNotMatch(await trafficSummary.innerText(),/31\.8\.2026/);checks++;
   assert.equal(await trafficSummary.locator('ha-icon[icon="mdi:road-variant"]').count(),1);checks++;
   assert.match(await card.locator('details[data-panel="events"] > summary').innerText(),/Theater ·/);checks++;
+  assert.equal(await card.locator('details[data-panel="events"] > summary .symbol ha-icon').getAttribute('icon'),'mdi:drama-masks');checks++;
   if(width===440)await page.screenshot({path:`test-results/card-${theme}-collapsed.png`,fullPage:true});
   await card.locator('details[data-panel="eds"] > summary').click();
   assert(await card.locator('details[data-panel="eds"]').evaluate(e=>e.open));checks++;
@@ -77,8 +80,34 @@ add('tourism',[]);add('opstina',[{title:'News',description:'Information',status:
   assert.match(eventText,/Lesung im November/);checks++;
   assert.match(eventText,/Uhrzeit nicht veröffentlicht/);checks++;
   assert.match(eventText,/Feste & Basare · Saisonübersicht/);checks++;
-  assert.match(eventText,/Saisonhinweis · Jahrestermin offen/);checks++;
-  assert.match(eventText,/Novogodišnji bazar/);checks++;
+  const seasons=card.locator('details[data-panel="event-seasonal"]');
+  assert.equal(await seasons.evaluate(e=>e.open),false);checks++;
+  assert.equal(await seasons.locator('article').isVisible(),false);checks++;
+  await seasons.locator(':scope > summary').click();
+  assert.match(await seasons.innerText(),/Saisonhinweis · Jahrestermin offen/);checks++;
+  assert.match(await seasons.innerText(),/Novogodišnji bazar/);checks++;
+  assert.match(await seasons.innerText(),/Markt \/ Basar · Dezember/);checks++;
+  assert.equal(await seasons.locator('.event-symbol ha-icon[icon="mdi:store-outline"]').count(),2);checks++;
+  assert.equal(await card.locator('.event-group ha-icon[icon="mdi:calendar-clock"]').count(),1);checks++;
+  assert.equal(await card.locator('.event-group ha-icon[icon="mdi:bullhorn-outline"]').count(),1);checks++;
+  const news=card.locator('details[data-panel="opstina"]'),textToggle=news.locator('.description-toggle');
+  assert.match(await news.innerText(),/Veröffentlicht am 14\. Oktober 2026/);checks++;
+  assert.equal(await news.locator('.description-preview').innerText().then(t=>t.includes(newsTitle)),false);checks++;
+  assert.equal(await textToggle.locator(':scope > .description').isVisible(),false);checks++;
+  assert.match(await textToggle.locator('summary').innerText(),/Mehr anzeigen/);checks++;
+  await textToggle.locator('summary').focus();await page.keyboard.press('Enter');
+  assert.equal(await textToggle.evaluate(e=>e.open),true);checks++;
+  assert.match(await textToggle.innerText(),/ENDE_DES_LANGEN_TEXTES/);checks++;
+  assert.match(await textToggle.locator('summary').innerText(),/Weniger anzeigen/);checks++;
+  // Preserve independent nested accordions during both new sensor states and
+  // the forced minute refresh, without copying a different record's state.
+  const refreshed=structuredClone(states);refreshed['sensor.arandjelovac_opstina'].attributes.last_success=new Date(now.getTime()+60000).toISOString();
+  await page.evaluate(states=>{const c=document.querySelector('arandjelovac-live-card');c.hass={states};c._render(true);},refreshed);
+  assert.equal(await seasons.evaluate(e=>e.open),true);checks++;
+  assert.equal(await textToggle.evaluate(e=>e.open),true);checks++;
+  await textToggle.locator('summary').click();
+  assert.equal(await textToggle.evaluate(e=>e.open),false);checks++;
+  assert.equal(await seasons.evaluate(e=>e.open),true);checks++;
   await card.evaluate(card=>card.setConfig({max_items:1}));
   assert.match(await card.locator('details[data-panel="events"]').innerText(),/Kulturankündigung 9/);checks++;
   await card.evaluate(card=>card.setConfig({}));
@@ -130,6 +159,40 @@ add('tourism',[]);add('opstina',[{title:'News',description:'Information',status:
  for(const key of ['library','museum','manifestations','tourism'])delete legacyOnly['sensor.arandjelovac_'+key];
  await page.evaluate(states=>{document.querySelector('arandjelovac-live-card').hass={states};},legacyOnly);
  assert.match(await page.locator('arandjelovac-live-card').locator('details[data-panel="events"]').innerText(),/Kulturankündigung 9/);checks++;
+ const categories=structuredClone(states);
+ categories['sensor.arandjelovac_kultura'].attributes.items=['theatre','concert','exhibition','reading','market','festival'].map((type,i)=>({id:'type-'+i,title:'Kategorie '+type,event_type:type,kind:'event',start_at:future,status:'scheduled',source_url:'https://centarzakulturuarandjelovac.rs/type-'+i}));
+ categories['sensor.arandjelovac_manifestations'].attributes.items=[
+  ['Sommer','JUL - AVGUST'],['Sommermonate','u toku letnjih meseci'],['Gulasch','poslednja nedelja septembra'],['Kyrillischer Monat','децембар']
+ ].map(([title,season_label],i)=>({id:'season-'+i,title,season_label,kind:'seasonal',status:'seasonal',source_url:'https://bukovickabanja.rs/season-'+i}));
+ await page.evaluate(states=>{document.querySelector('arandjelovac-live-card').hass={states};},categories);
+ const events=page.locator('arandjelovac-live-card').locator('details[data-panel="events"]');
+ for(const [type,symbol] of Object.entries({theatre:'drama-masks',concert:'music',exhibition:'palette-outline',reading:'book-open-page-variant',market:'store-outline',festival:'party-popper'})){
+  const row=events.locator('article').filter({hasText:'Kategorie '+type});
+  assert.equal(await row.locator('.event-symbol ha-icon').getAttribute('icon'),'mdi:'+symbol);checks++;
+ }
+ const announcement={id:'festival',title:'Festival ohne Jahrestermin',event_type:'theatre',kind:'announcement',status:'announcement',published_at:now.toISOString(),source_url:'https://centarzakulturuarandjelovac.rs/festival/'};
+ categories['sensor.arandjelovac_kultura'].attributes.items.push(announcement);
+ await page.evaluate(states=>{document.querySelector('arandjelovac-live-card').hass={states};},categories);
+ assert.match(await events.locator('article').filter({hasText:announcement.title}).innerText(),/Theater · Veröffentlicht am 14\. Oktober 2026/);checks++;
+ const seasons=events.locator('details[data-panel="event-seasonal"]');
+ assert.match(await seasons.textContent(),/Juli - August/);checks++;
+ assert.match(await seasons.textContent(),/Während der Sommermonate/);checks++;
+ assert.match(await seasons.textContent(),/Ende September/);checks++;
+ assert.match(await seasons.textContent(),/Dezember/);checks++;
+ assert.doesNotMatch(await seasons.textContent(),/2026|2027/);checks++;
+ const onlyMarket=structuredClone(categories);
+ onlyMarket['sensor.arandjelovac_kultura'].attributes.items=onlyMarket['sensor.arandjelovac_kultura'].attributes.items.filter(i=>i.event_type==='market');
+ await page.evaluate(states=>{document.querySelector('arandjelovac-live-card').hass={states};},onlyMarket);
+ assert.equal(await events.locator(':scope > summary .symbol ha-icon').getAttribute('icon'),'mdi:store-outline');checks++;
+ const unsafe=structuredClone(states);
+ unsafe['sensor.arandjelovac_opstina'].attributes.items=[{id:'"><img src=x onerror="window.PWNED=true">',title:'Sicherer Titel',description:longDescription+' <img src=x onerror="window.PWNED=true">',source_url:'javascript:alert(1)'}];
+ await page.evaluate(states=>{document.querySelector('arandjelovac-live-card').hass={states};},unsafe);
+ const unsafeNews=page.locator('arandjelovac-live-card').locator('details[data-panel="opstina"]');
+ await unsafeNews.locator('.description-toggle > summary').click();
+ assert.equal(await unsafeNews.locator('img').count(),0);checks++;
+ assert.equal(await unsafeNews.locator('a').count(),0);checks++;
+ assert.match(await unsafeNews.locator('.description-toggle > .description').innerText(),/<img src=x/);checks++;
+ assert.equal(await page.evaluate(()=>window.PWNED),undefined);checks++;
  assert.deepEqual(errors,[]);checks++;
  await browser.close();console.log(JSON.stringify({browser:'Chromium',themes:Object.keys(palettes),widths:[320,440,736],assertions:checks,errors}));
 })().catch(e=>{console.error(e);process.exit(1)});
