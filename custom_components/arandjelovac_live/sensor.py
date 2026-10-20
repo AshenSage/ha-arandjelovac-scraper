@@ -80,7 +80,8 @@ class SourceHealthSensor(CoordinatorEntity[ProviderCoordinator], SensorEntity):
 
     @property
     def native_value(self) -> str:
-        return 'ok' if self.coordinator.data and self.coordinator.data.get('available') else 'error'
+        if not self.coordinator.data or not self.coordinator.data.get('available'):return 'error'
+        return 'partial' if self.coordinator.data.get('metadata',{}).get('complete_for_window') is False else 'ok'
 
     @property
     def extra_state_attributes(self) -> dict[str, Any]:

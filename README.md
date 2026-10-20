@@ -1,6 +1,6 @@
 # Aranđelovac Live
 
-Lokale Informationen für Home Assistant: geplante Stromabschaltungen, Wassermeldungen, Verkehr, Veranstaltungen und Gemeindemeldungen. Eine gemeinsame Dashboardkarte für das Smartphone mit den klar getrennten Bereichen **Versorgung & Verkehr**, **Veranstaltungen** und **Nachrichten aus der Gemeinde**.
+Lokale Informationen für Home Assistant: geplante Stromabschaltungen, Wassermeldungen, lokale Arbeiten, Verkehr, Veranstaltungen und Gemeindemeldungen. Eine gemeinsame Dashboardkarte für das Smartphone mit den klar getrennten Bereichen **Versorgung & Verkehr**, **Veranstaltungen** und **Nachrichten aus der Gemeinde**.
 
 ## Installation mit HACS
 
@@ -10,7 +10,7 @@ Voraussetzung: **Home Assistant Core 2026.10.1 oder neuer**, HACS und Internetzu
 2. `https://github.com/AshenSage/ha-arandjelovac-scraper` hinzufügen, Kategorie **Integration**.
 3. **Aranđelovac Live** herunterladen und Home Assistant vollständig neu starten.
 4. **Einstellungen → Geräte & Dienste → Integration hinzufügen → Aranđelovac Live**.
-5. **Komplettpaket · alle 9 Quellen** wählen. Es entstehen neun unabhängige Integrationseinträge. Bereits vorhandene Quellen werden übersprungen.
+5. **Komplettpaket · alle 10 Quellen** wählen. Es entstehen zehn unabhängige Integrationseinträge. Bereits vorhandene Quellen werden übersprungen.
 6. Nach Abschluss der Einrichtung die HA-Seite bzw. App einmal vollständig neu laden.
 7. Im gewünschten Dashboard eine **manuelle Karte** hinzufügen:
 
@@ -27,12 +27,12 @@ Falls die Karte nach dem Neustart noch nicht erkannt wird:
 
 1. Unter **Einstellungen → Geräte & Dienste** prüfen, ob **Aranđelovac Live** eingerichtet ist. Ein Download in HACS allein aktiviert die Integration noch nicht.
 2. HA vollständig neu starten und anschliessend die HA-Seite beziehungsweise App neu laden.
-3. Nur bei weiter bestehendem Fehler unter **Dashboards → Ressourcen** diese URL als **JavaScript-Modul** ergänzen: `/arandjelovac_live/arandjelovac-live-card.js?v=1.4.0`. Falls der Menüpunkt fehlt, im Benutzerprofil den erweiterten Modus einschalten.
+3. Nur bei weiter bestehendem Fehler unter **Dashboards → Ressourcen** diese URL als **JavaScript-Modul** ergänzen: `/arandjelovac_live/arandjelovac-live-card.js?v=1.5.0`. Falls der Menüpunkt fehlt, im Benutzerprofil den erweiterten Modus einschalten.
 4. Liefert dieselbe URL beim direkten Öffnen eine 404-Seite, ist die Integration noch nicht geladen. Dann zuerst die Integrationsseite und HA-Protokolle prüfen; eine Ressourcenregistrierung behebt keinen fehlenden HTTP-Pfad.
 
-Bei einer bereits manuell eingetragenen Ressource deren URL nach dem Update auf `?v=1.4.0` ändern und die HA-Seite beziehungsweise App neu laden. Den bestehenden Eintrag bearbeiten, keine zweite Ressource hinzufügen. Die Karten-YAML und Entitäts-IDs bleiben erhalten.
+Bei einer bereits manuell eingetragenen Ressource deren URL nach dem Update auf `?v=1.5.0` ändern und die HA-Seite beziehungsweise App neu laden. Den bestehenden Eintrag bearbeiten, keine zweite Ressource hinzufügen. Die Karten-YAML und Entitäts-IDs bleiben erhalten.
 
-Die Karte zeigt kompakte Verkehrszusammenfassungen mit ausdrücklich genannter Strecke, Ort und Frist. Warnungen verwenden einen farbigen Rand auf der normalen Kartenfläche. Wassertexte nennen Meldungen und weisen auf Bildbeiträge hin. Kino ist in der Dashboardkarte ausgeblendet. Theater, Konzerte, Ausstellungen, Lesungen und andere Kulturmeldungen bleiben sichtbar. Einzeltermine aus Programmen verlinken auf das Original, statt den gesamten Wochenplan zu wiederholen. **9/9 Quellen erreichbar** bezeichnet erfolgreiche, noch aktuelle Quellenabrufe und keine bestätigte Versorgung im Haus.
+Die Karte zeigt kompakte Verkehrszusammenfassungen mit ausdrücklich genannter Strecke, Ort und Frist. Warnungen verwenden einen farbigen Rand auf der normalen Kartenfläche. Wassertexte nennen Meldungen und weisen auf Bildbeiträge hin. Kino ist in der Dashboardkarte ausgeblendet. Theater, Konzerte, Ausstellungen, Lesungen und andere Kulturmeldungen bleiben sichtbar. Einzeltermine aus Programmen verlinken auf das Original, statt den gesamten Wochenplan zu wiederholen. **10/10 Quellen erreichbar** bezeichnet erfolgreiche, noch aktuelle Quellenabrufe und keine bestätigte Versorgung im Haus.
 
 ## Quellen und Sensoren
 
@@ -40,6 +40,7 @@ Die Karte zeigt kompakte Verkehrszusammenfassungen mit ausdrücklich genannter S
 |---|---|---|
 | EDS | Geplante Abschaltungen in Opština Aranđelovac | `sensor.arandjelovac_eds_outages` |
 | JKP Bukulja | Wasserinformationen, Unterbruchsmeldungen, Bildbeiträge | `sensor.arandjelovac_jkp_water` |
+| JKP Bukulja · Arbeiten | Lokale Strassen-, Reinigungs- und Versorgungsarbeiten, getrennt von Wasser | `sensor.arandjelovac_jkp_works` |
 | Putevi Srbije | Veröffentlichte Meldungen für eingestellte Orte | `sensor.arandjelovac_putevi_traffic` |
 | Opština | Neuigkeiten der Gemeinde | `sensor.arandjelovac_opstina_news` |
 | Kulturzentrum | Termine und Vorankündigungen | `sensor.arandjelovac_kultura_events` |
@@ -48,7 +49,7 @@ Die Karte zeigt kompakte Verkehrszusammenfassungen mit ausdrücklich genannter S
 | Bibliothek Sveti Sava | Lesungen und Bibliotheksprogramm | `sensor.arandjelovac_library_events` |
 | Tourismus · Manifestacije | Feste, Basare und saisonale Hinweise ohne bestätigten Jahrestermin | `sensor.arandjelovac_manifestations_events` |
 
-Jede Quelle besitzt zusätzlich einen Diagnose-Sensor `sensor.arandjelovac_<provider>_source` mit `ok` oder `error`, Fehlerdetails und letztem erfolgreichen Abruf. Provider-IDs: `eds`, `jkp`, `putevi`, `opstina`, `kultura`, `tourism`, `museum`, `library`, `manifestations`. Dadurch bleibt der Fehler in der Karte sichtbar, wenn HA die Attribute des Hauptsensors bei `unavailable` ausblendet. Die Karte findet die Sensoren automatisch, auch nach regulären Umbenennungen. Bei Bedarf lassen sie sich ausdrücklich zuordnen:
+Jede Quelle besitzt zusätzlich einen Diagnose-Sensor `sensor.arandjelovac_<provider>_source` mit `ok`, `partial` oder `error`, Fehlerdetails und letztem erfolgreichen Abruf. Provider-IDs: `eds`, `jkp`, `jkp_works`, `putevi`, `opstina`, `kultura`, `tourism`, `museum`, `library`, `manifestations`. Dadurch bleibt der Fehler in der Karte sichtbar, wenn HA die Attribute des Hauptsensors bei `unavailable` ausblendet. Die Karte findet die Sensoren automatisch, auch nach regulären Umbenennungen. Bei Bedarf lassen sie sich ausdrücklich zuordnen:
 
 ```yaml
 type: custom:arandjelovac-live-card
@@ -58,6 +59,7 @@ transliterate: true
 entities:
   eds: sensor.arandjelovac_eds_outages
   jkp: sensor.arandjelovac_jkp_water
+  jkp_works: sensor.arandjelovac_jkp_works
   putevi: sensor.arandjelovac_putevi_traffic
   opstina: sensor.arandjelovac_opstina_news
   kultura: sensor.arandjelovac_kultura_events
@@ -72,14 +74,14 @@ entities:
 ## Bedeutung und Grenzen der Anzeige
 
 - **EDS:** Der Zustand zählt noch nicht abgelaufene veröffentlichte Einträge. Gefiltert wird ausschliesslich nach der Gemeinde, nicht allein nach dem EDS-Ogranak. Geprüfte Abdeckung und verkürzte Veröffentlichung werden ausdrücklich angezeigt. Ein gültiges Zeitfenster misst keinen Stromausfall im Haus.
-- **Wasser:** Der Hauptsensor zählt Meldungen im Anzeigezeitraum, nicht gemessene Ausfälle. Bauarbeiten ohne angekündigten Unterbruch sind Informationen. Bildbeiträge bleiben als nicht automatisch ausgewertet sichtbar; es gibt keine OCR. Bei Meldungen ohne bestätigtes Ende wird kein Reparaturzeitpunkt erfunden. Nach drei Tagen werden solche Einträge als ältere Meldungen gekennzeichnet, ausdrücklich ohne Entwarnung.
-- **Verkehr:** Standardfilter: Aranđelovac, Darosava, Ranilović. Quellenoptionen erlauben weitere Orte. Der Filter arbeitet mit Ortsnamen, nicht mit einem geografischen Radius. Eine abgelaufene veröffentlichte Frist bleibt als solche gekennzeichnet; das bestätigt keine Freigabe. Bildkoordinaten aus der Quellkarte werden nicht als GPS-Koordinaten ausgegeben.
-- **Gemeinde:** Standardkategorie 47 (Neuigkeiten). Neueste 30 Veröffentlichungen dieser Kategorien, gefiltert auf den Anzeigezeitraum. Verlinkte PDFs, private Konten und Formulare werden nicht abgefragt.
-- **Veranstaltungen:** Kulturzentrum, Tourismus, Museum und Bibliothek nutzen ihre aktuellen öffentlichen RSS-Ausschnitte. Das ist kein vollständiger Veranstaltungskalender. Kino ist in der Karte ausgeblendet, auch bei älteren Einträgen ohne Kategorie. Erkennbare Programmtage und Uhrzeiten werden getrennt erfasst. Bei bekanntem Datum ohne Uhrzeit wird keine Startzeit erfunden. Vergangene erkennbare Termine verschwinden; Ticketverkauf und Anmeldefristen werden nicht als Veranstaltungstermine ausgegeben. Unklare Kulturmeldungen bleiben getrennt von datierten Terminen sichtbar.
+- **Wasser:** Der Hauptsensor zählt Meldungen im Anzeigezeitraum, nicht gemessene Ausfälle. Bauarbeiten ohne angekündigten Unterbruch sind Informationen. Bildbeiträge bleiben als nicht automatisch ausgewertet sichtbar; es gibt keine OCR. Bei Meldungen ohne bestätigtes Ende wird kein Reparaturzeitpunkt erfunden. Ein abgelaufenes geplantes Zeitfenster bleibt ohne Versorgungsbestätigung sichtbar. Nach drei Tagen werden offene Einträge als ältere Meldungen gekennzeichnet, ausdrücklich ohne Entwarnung. Reparaturabschluss und ausdrücklich bestätigte Normalisierung sind getrennte Zustände. Erwartungen, Bedingungen und Verneinungen erzeugen keine Entwarnung. Schüler- und Studentenbesuche zählen nicht als Versorgungshinweise.
+- **Verkehr:** Standardfilter: Aranđelovac, Darosava, Ranilović, Rogača, Topola, Božurnja, Orašac, Bukovik, Garaši, Jelovik, Tuleži, Venčane, Misača und Kopljari. Ein ausdrücklich konfigurierter Ortsfilter bleibt erhalten. Bačka Topola wird nicht als lokale Topola-Meldung übernommen. Der Filter arbeitet mit Ortsnamen, nicht mit einem geografischen Radius. Eine abgelaufene veröffentlichte Frist bleibt als solche gekennzeichnet; das bestätigt keine Freigabe. Bildkoordinaten aus der Quellkarte werden nicht als GPS-Koordinaten ausgegeben.
+- **Gemeinde:** Standardmässig alle Kategorien im Anzeigezeitraum; Beschaffungsartikel und interne Stellen werden anhand ihrer Überschrift ausgefiltert. Bis zu drei Seiten mit je 100 Veröffentlichungen; wird diese Grenze erreicht, ist der Quellenumfang ausdrücklich als begrenzt markiert. Eine ausdrücklich konfigurierte Kategorienliste bleibt erhalten; eine leere Liste bedeutet alle Kategorien. Verlinkte PDFs, private Konten und Formulare werden nicht abgefragt.
+- **Veranstaltungen:** Kulturzentrum, Tourismus, Museum und Bibliothek nutzen ihre aktuellen öffentlichen RSS-Ausschnitte. Das ist kein vollständiger Veranstaltungskalender. Das Museum ergänzt die separate offizielle Ausstellungsübersicht; undatierte Angebote stehen in der Vorschau mit unbestätigter Laufzeit, ohne erfundenes Veröffentlichungs- oder Veranstaltungsdatum. Kino ist in der Karte ausgeblendet, auch bei älteren Einträgen ohne Kategorie. Erkennbare Programmtage und Uhrzeiten werden getrennt erfasst. Bei bekanntem Datum ohne Uhrzeit wird keine Startzeit erfunden. Vergangene erkennbare Termine verschwinden; Ticketverkauf und Anmeldefristen werden nicht als Veranstaltungstermine ausgegeben. Unklare Kulturmeldungen bleiben getrennt von datierten Terminen sichtbar.
 - **Feste und Basare:** Die zusätzliche öffentliche Tourismusübersicht wird als allgemeiner Veranstaltungskatalog eingelesen. Eine Angabe wie „decembar“ bestätigt keinen Termin im Dezember 2026. Solche Hinweise bleiben ausdrücklich als Saisonhinweis ohne bestätigten Jahrestermin gekennzeichnet. Verlinkte Detailseiten können ergänzende Angaben enthalten; diese Version liest die Übersichtsseite, nicht sämtliche Detailseiten oder Social-Media-Konten.
 - **Quellenfehler:** Ein Hauptsensor wird `unavailable`; der zugehörige Quellenstatus bleibt mit Fehlerdetails lesbar. Ein Quellenfehler wird niemals als Nullzählung dargestellt. Jede Quelle aktualisiert unabhängig von den anderen.
 
-Für Bukulja wird ausschliesslich die aktuelle öffentliche Meldungsseite mit ihren relevanten Artikeln verwendet. Keine API-, Login- oder Archivabfrage. Verlinkte Texte werden im Arbeitsspeicher maximal sechs Stunden wiederverwendet, danach neu gelesen. Ein Neustart stellt keine alten Quelldaten als aktuelle Wahrheit wieder her.
+Bukulja liest die öffentliche Meldungsliste einschliesslich ihrer datumsrelevanten Folgeseiten (maximal drei Seiten und 24 Detailartikel je Quelle). Erreichte Grenzen werden als unvollständiger Ausschnitt markiert. Kein Login und keine unbegrenzte Archivabfrage. Wasserartikel werden beim nächsten regulären 15-Minuten-Abruf neu gelesen, lokale Arbeitsartikel nach 30 Minuten; damit werden nachträgliche Aktualisierungen nicht sechs Stunden verdeckt. Ein Neustart stellt keine alten Quelldaten als aktuelle Wahrheit wieder her.
 
 ## Einstellungen und Intervalle
 
@@ -88,7 +90,8 @@ Unter **Geräte & Dienste → Aranđelovac Live → Quelle → Konfigurieren** l
 | Quelle | Regulärer Abruf | Veraltet nach |
 |---|---:|---:|
 | EDS | 30 Min.; 15 Min. bei gültiger Teilabdeckung | 65 Min. |
-| Bukulja | 15 Min. | 45 Min. |
+| Bukulja · Wasser | 15 Min. | 45 Min. |
+| Bukulja · lokale Arbeiten | 30 Min. | 75 Min. |
 | Putevi | 15 Min. | 45 Min. |
 | Gemeinde | 60 Min. | 135 Min. |
 | Kulturzentrum | 120 Min. | 255 Min. |
@@ -98,6 +101,12 @@ Unter **Geräte & Dienste → Aranđelovac Live → Quelle → Konfigurieren** l
 | Feste und Basare | 360 Min. | 735 Min. |
 
 Die lokale Minutenprüfung aktualisiert Ablauf und Quellenfrische ohne zusätzliche HTTP-Anfrage. Standard-Anzeigezeitraum: 30 Tage, Veranstaltungshorizont: 60 Tage. Fehler führen zu keinem sofortigen Retry-Sturm. Ein manueller Abruf ist über `homeassistant.update_entity` auf dem Hauptsensor möglich.
+
+## Update auf Version 1.5.0
+
+In HACS auf **1.5.0** aktualisieren und Home Assistant neu starten. Danach **Integration hinzufügen → Aranđelovac Live → Komplettpaket · alle 10 Quellen** wählen; nur die neue Quelle **JKP Bukulja · Lokale Arbeiten** wird ergänzt. Vorhandene Einträge und Entity-IDs bleiben erhalten. Eine manuelle Kartenressource auf `/arandjelovac_live/arandjelovac-live-card.js?v=1.5.0` aktualisieren und das Frontend neu laden.
+
+Unveränderte Standardkonfigurationen übernehmen den erweiterten Ortsfilter und alle Gemeindekategorien. Explizite eigene Filter bleiben erhalten. `partial` bedeutet: Abruf erfolgreich, aber der eingestellte Ausschnitt konnte nicht vollständig geprüft werden. Auch bei erreichbarer Quelle wird diese Begrenzung in der Karte angezeigt.
 
 ## Update von Version 1.3.x
 

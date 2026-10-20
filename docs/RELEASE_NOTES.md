@@ -1,23 +1,18 @@
-# Aranđelovac Live 1.4.0
+# Aranđelovac Live 1.5.0
 
-Die freigegebene kompakte Veranstaltungsansicht ist umgesetzt: drei Reiter mit Eintragszahl und ein Kalenderblatt direkt neben dem Termin.
+Dauerhafte Korrektur der Quellenabdeckung und der Einordnung von Versorgungsmeldungen. Fehlende Meldungen werden aus ihren Quellen gelesen, ohne fest eingetragene Einzelereignisse.
 
-- **Termine:** Chronologische Liste mit Kalendertag, Monat und Wochentag; daneben Uhrzeit und Titel. Keine erfundene Uhrzeit bei reinen Datumsangaben.
-- **Vorschau:** Kulturmeldungen und Ankündigungen ohne bestätigten Veranstaltungstag. Veröffentlichungsdaten stehen klar bezeichnet in den Details.
-- **Feste:** Allgemeiner Saisonkatalog mit deutschen Monatskürzeln und eigenem Hinweis auf unbestätigte Jahrestermine. Monatsspannen bleiben Spannen.
-- Ein Eintrag öffnet seinen vollständigen geladenen Textausschnitt und den Originalverweis. Die Übersicht zeigt keine Artikeltexte. Alle geladenen Einträge ausser Kino bleiben erreichbar, auch nach dem achten Eintrag.
-- Der gewählte Reiter, geöffnete Details und der Tastaturfokus bleiben bei Daten- und Minutenupdates erhalten. Die Reiter unterstützen Pfeiltasten und Pos1/Ende; mehrere Karten besitzen unabhängige Auswahlen.
-- Vergangene bzw. bereits beendete erkennbare Termine verschwinden auch bei der lokalen Minutenaktualisierung. Ein heute vergangener Beginn ohne bekanntes Ende bleibt entsprechend gekennzeichnet.
-- Klar getrennte Hauptbereiche: **Versorgung & Verkehr**, **Veranstaltungen** und **Nachrichten aus der Gemeinde**. Eigene Symbole für die Veranstaltungsarten bleiben erhalten.
-- Quellenfehler bleiben im Veranstaltungsbereich sichtbar. Bei Ausfall aller Veranstaltungsquellen steht **–** statt einer vermeintlichen Nullzählung.
+- Gemeinde: standardmässig alle Kategorien im Anzeigezeitraum statt nur Kategorie 47. Begrenzte Pagination; Beschaffung und interne Stellen ausgefiltert. Eigene Kategorien bleiben erhalten.
+- JKP: datumsbegrenzte Folgeseiten und separate Quelle für lokale Arbeiten. Studentenbesuche zählen nicht mehr als Wassermeldungen. Wasserartikel werden beim nächsten regulären Abruf erneut gelesen statt bis zu sechs Stunden gecacht.
+- Wasser: Reparaturabschluss, bestätigte Normalisierung, offene Störung und abgelaufenes Planfenster getrennt. Erwartete oder verneinte Normalisierung ist keine Entwarnung. Offene Meldungen haben bei begrenzter Anzeige Vorrang.
+- Verkehr: Standardorte umfassen Gemeinde und benachbarte Zufahrten inklusive Topola–Božurnja. Bačka Topola bleibt ausgeschlossen; eigene Ortslisten bleiben erhalten.
+- Museum: separate offizielle Ausstellungsübersicht zusätzlich zum RSS. Ohne bestätigte Laufzeit erscheinen Angebote ausdrücklich undatiert.
+- Quellenstatus `partial` und sichtbarer Hinweis bei begrenzter Auswertung oder fehlgeschlagener Zusatzquelle.
 
 ## Aktualisieren
 
-1. In HACS auf **1.4.0** aktualisieren und Home Assistant vollständig neu starten.
-2. Die bestehende manuelle Dashboard-Ressource bearbeiten, Typ **JavaScript-Modul**:
-   `/arandjelovac_live/arandjelovac-live-card.js?v=1.4.0`
-3. HA-Seite beziehungsweise App vollständig neu laden. Die Karten-YAML und alle neun bereits eingerichteten Quellen bleiben gültig; keine erneute Einrichtung nötig.
+1. HACS-Version **1.5.0** installieren und HA neu starten.
+2. **Integration hinzufügen → Aranđelovac Live → Komplettpaket · alle 10 Quellen** ergänzt nur die fehlende Quelle für lokale Arbeiten.
+3. Eine vorhandene manuelle Kartenressource auf `/arandjelovac_live/arandjelovac-live-card.js?v=1.5.0` ändern und das Frontend neu laden. Bestehende Entity-IDs bleiben erhalten.
 
-Bei einem Update direkt von 1.2.x ergänzt **Integration hinzufügen → Aranđelovac Live → Komplettpaket · alle 9 Quellen** ausschliesslich die fehlenden Quellen.
-
-Geprüft: 168 Python-Tests, 17 Tests im echten HA Core 2026.10.1 und 727 Chromium-Assertions in drei Themes bei 320, 440 und 736 px. Die tatsächlichen HA-Symbole und eine lokale Wiedergabe der erfassten Quelldaten wurden ebenfalls geprüft. Die produktive Smartphone-Abnahme von 1.4.0 folgt nach Installation.
+Prüfungen und aktueller Quellenabgleich: [TEST_REPORT.md](TEST_REPORT.md).

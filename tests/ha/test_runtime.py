@@ -66,7 +66,7 @@ async def test_missing_sources_can_complete_existing_eds(hass):
     assert hass.config_entries.async_get_entry(entry.entry_id) is entry
 
 
-async def test_upgrade_adds_only_three_new_sources_to_existing_six(hass):
+async def test_upgrade_adds_missing_sources_to_existing_six(hass):
     old=[]
     for key in ['eds','jkp','putevi','opstina','kultura','tourism']:
         entry=MockConfigEntry(domain=DOMAIN,unique_id=f'{key}:arandjelovac',data={'provider':key,'location':'arandjelovac'})
@@ -76,8 +76,8 @@ async def test_upgrade_adds_only_three_new_sources_to_existing_six(hass):
         await hass.config_entries.flow.async_configure(result['flow_id'],{'provider':'all'})
         await hass.async_block_till_done()
     entries=hass.config_entries.async_entries(DOMAIN)
-    assert len(entries)==9
-    assert {e.data['provider'] for e in entries}-{e.data['provider'] for e in old}=={'museum','library','manifestations'}
+    assert len(entries)==len(PROVIDERS)
+    assert {e.data['provider'] for e in entries}-{e.data['provider'] for e in old}=={'museum','library','manifestations','jkp_works'}
     assert all(hass.config_entries.async_get_entry(e.entry_id) is e for e in old)
 
 
@@ -188,3 +188,25 @@ async def test_options_flow_reconfigures_filters(hass):
     result=await hass.config_entries.options.async_configure(result['flow_id'],{'areas':'Aranđelovac, Topola'})
     assert result['type']=='create_entry'
     assert entry.options['areas']=='Aranđelovac, Topola'
+
+
+async def test_empty_municipal_categories_means_all(hass):
+    entry=MockConfigEntry(domain=DOMAIN,unique_id='opstina:arandjelovac',data={'provider':'opstina','location':'arandjelovac'})
+    entry.add_to_hass(hass)
+    result=await hass.config_entries.options.async_init(entry.entry_id)
+    result=await hass.config_entries.options.async_configure(result['flow_id'],{'categories':'','lookback_days':30})
+    assert result['type']=='create_entry'
+    assert entry.options['categories']==''
+
+
+async def test_source_health_distinguishes_incomplete_window(hass):
+    from custom_components.arandjelovac_live.sensor import SourceHealthSensor
+    from unittest.mock import MagicMock
+    coordinator=MagicMock()
+    coordinator.provider.spec.provider='jkp'
+    coordinator.provider.spec.unique_id='jkp:arandjelovac'
+    coordinator.data={'available':True,'metadata':{'complete_for_window':False}}
+    sensor=SourceHealthSensor(coordinator,MagicMock())
+    assert sensor.native_value=='partial'
+    coordinator.data['metadata']['complete_for_window']=True
+    assert sensor.native_value=='ok'

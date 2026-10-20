@@ -4,7 +4,7 @@
     "step": {
       "user": {
         "title": "Aranđelovac Live",
-        "description": "Richtet alle neun Quellen oder eine einzelne Quelle ein. Vorhandene Quellen bleiben erhalten; das Komplettpaket ergänzt fehlende Einträge.",
+        "description": "Richtet alle zehn Quellen oder eine einzelne Quelle ein. Vorhandene Quellen bleiben erhalten; das Komplettpaket ergänzt fehlende Einträge.",
         "data": {
           "provider": "Quelle"
         }
@@ -24,13 +24,13 @@
           "lookback_days": "Meldungen der letzten Tage",
           "horizon_days": "Veranstaltungen der nächsten Tage",
           "areas": "Orte, mit Komma getrennt",
-          "categories": "Gemeindekategorien (47 = Neuigkeiten)"
+          "categories": "Gemeindekategorien (leer = alle)"
         }
       }
     },
     "error": {
       "invalid_range": "Wert ausserhalb des erlaubten Bereichs.",
-      "invalid_categories": "Kategorien als Zahlen, mit Komma getrennt."
+      "invalid_categories": "Leer lassen oder Kategorien als Zahlen, mit Komma getrennt."
     }
   },
   "entity": {
@@ -61,6 +61,9 @@
       },
       "manifestations_events": {
         "name": "Feste und Basare"
+      },
+      "jkp_works": {
+        "name": "Lokale Arbeitsmeldungen"
       }
     }
   }

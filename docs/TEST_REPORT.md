@@ -1,4 +1,21 @@
-# Prüfbericht · Aranđelovac Live 1.4.0
+# Prüfbericht · Aranđelovac Live 1.5.0
+
+Stand: 20.10.2026. Ziel: HA Core 2026.10.1, Python 3.14.8.
+
+- 187 Offline-Python-Tests: erfolgreich, einschliesslich Regressionen für Kategorien-/Ortsabdeckung, Folgeseiten, Änderungen im selben Wasserartikel, spätere Reparaturmeldungen, verneinte/erwartete Entwarnungen und abgelaufene Planfenster.
+- 20 Tests mit echtem HA Core 2026.10.1: erfolgreich, einschliesslich neuer Quelle, Options Flow mit allen Gemeindekategorien und `partial`-Status.
+- 737 Chromium-Assertions: erfolgreich in drei Themes bei 320, 440 und 736 px; keine JavaScript-Fehler.
+- Syntax, Paket- und Versionsprüfung: erfolgreich.
+- Quellenabruf verwendet die tatsächlich ausgelieferten Provider. Metadaten des aktuellen Abgleichs stehen in `live-verification.json`; fremde Artikelvolltexte werden nicht veröffentlicht.
+
+Die Reparaturabschlussmeldung vom 22.09. wird als abgeschlossene Reparatur gelesen. Sie bestätigt keine aktuelle Wasserversorgung; die frühere Störung bleibt entsprechend als historisch/unbestätigt getrennt. Das ist eine bewusste fachliche Grenze. Undatierte Museumsangebote werden nicht zu neuen Veranstaltungen oder Veröffentlichungen umgedeutet.
+
+Live-Prüfung 20.10.2026, 07:41 Europe/Belgrade: neun Quellen verfügbar; die Bibliothek antwortete mit HTTP 503 und wird korrekt als unbekannt/nicht verfügbar statt als Null dargestellt. Verkehr: 3, Gemeinde: 7, lokale Arbeiten: 5, undatierte Museumsangebote: 4. Produktive Installation und Zustandsprüfung erfolgen nach erfolgreicher CI-Freigabe.
+
+---
+
+## Historische Prüfberichte bis 1.4.0
+
 
 Stand: 14.10.2026. Geprüftes Laufzeitziel: Home Assistant Core 2026.10.1, Python 3.14.2.
 
