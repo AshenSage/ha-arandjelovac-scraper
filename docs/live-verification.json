@@ -1,54 +1,54 @@
 {
-  "checked_at": "2026-10-14T17:48:03.000776+02:00",
+  "checked_at": "2026-10-20T07:41:40.950575+02:00",
   "sources": [
     {
       "provider": "eds",
       "available": true,
-      "count": 3,
-      "items_count": 3,
+      "count": 1,
+      "items_count": 1,
       "error": null,
-      "coverage_end": "2026-10-17",
+      "coverage_end": "2026-10-23",
       "http": {
         "requests": [
           {
             "url": "https://www.elektrodistribucija.rs/planirana-iskljucenja/planirana-kv",
             "status": 200,
-            "bytes": 48448,
+            "bytes": 49559,
             "content_type": "text/html",
             "charset": "utf-8",
-            "duration_ms": 6830
-          },
-          {
-            "url": "https://www.elektrodistribucija.rs/planirana-iskljucenja-srbija/Kraljevo_Dan_0_Iskljucenja.htm",
-            "status": 200,
-            "bytes": 31549,
-            "content_type": "text/html",
-            "charset": null,
-            "duration_ms": 238
-          },
-          {
-            "url": "https://www.elektrodistribucija.rs/planirana-iskljucenja-srbija/Kraljevo_Dan_2_Iskljucenja.htm",
-            "status": 200,
-            "bytes": 24356,
-            "content_type": "text/html",
-            "charset": null,
-            "duration_ms": 227
-          },
-          {
-            "url": "https://www.elektrodistribucija.rs/planirana-iskljucenja-srbija/Kraljevo_Dan_3_Iskljucenja.htm",
-            "status": 200,
-            "bytes": 2280,
-            "content_type": "text/html",
-            "charset": null,
-            "duration_ms": 252
+            "duration_ms": 5574
           },
           {
             "url": "https://www.elektrodistribucija.rs/planirana-iskljucenja-srbija/Kraljevo_Dan_1_Iskljucenja.htm",
             "status": 200,
-            "bytes": 40751,
+            "bytes": 15059,
             "content_type": "text/html",
             "charset": null,
-            "duration_ms": 14123
+            "duration_ms": 239
+          },
+          {
+            "url": "https://www.elektrodistribucija.rs/planirana-iskljucenja-srbija/Kraljevo_Dan_2_Iskljucenja.htm",
+            "status": 200,
+            "bytes": 8160,
+            "content_type": "text/html",
+            "charset": null,
+            "duration_ms": 241
+          },
+          {
+            "url": "https://www.elektrodistribucija.rs/planirana-iskljucenja-srbija/Kraljevo_Dan_3_Iskljucenja.htm",
+            "status": 200,
+            "bytes": 7112,
+            "content_type": "text/html",
+            "charset": null,
+            "duration_ms": 303
+          },
+          {
+            "url": "https://www.elektrodistribucija.rs/planirana-iskljucenja-srbija/Kraljevo_Dan_0_Iskljucenja.htm",
+            "status": 200,
+            "bytes": 26181,
+            "content_type": "text/html",
+            "charset": null,
+            "duration_ms": 4274
           }
         ],
         "discovered_pages": [
@@ -71,33 +71,33 @@
         ],
         "parsed_pages": [
           {
-            "date": "2026-10-14",
+            "date": "2026-10-20",
             "url": "https://www.elektrodistribucija.rs/planirana-iskljucenja-srbija/Kraljevo_Dan_0_Iskljucenja.htm",
-            "rows": 35,
+            "rows": 30,
             "matched_rows": 0
           },
           {
-            "date": "2026-10-15",
+            "date": "2026-10-21",
             "url": "https://www.elektrodistribucija.rs/planirana-iskljucenja-srbija/Kraljevo_Dan_1_Iskljucenja.htm",
-            "rows": 46,
-            "matched_rows": 2
-          },
-          {
-            "date": "2026-10-16",
-            "url": "https://www.elektrodistribucija.rs/planirana-iskljucenja-srbija/Kraljevo_Dan_2_Iskljucenja.htm",
-            "rows": 27,
+            "rows": 16,
             "matched_rows": 1
           },
           {
-            "date": "2026-10-17",
+            "date": "2026-10-22",
+            "url": "https://www.elektrodistribucija.rs/planirana-iskljucenja-srbija/Kraljevo_Dan_2_Iskljucenja.htm",
+            "rows": 8,
+            "matched_rows": 0
+          },
+          {
+            "date": "2026-10-23",
             "url": "https://www.elektrodistribucija.rs/planirana-iskljucenja-srbija/Kraljevo_Dan_3_Iskljucenja.htm",
-            "rows": 1,
+            "rows": 7,
             "matched_rows": 0
           }
         ],
         "validated_coverage_at_fetch": {
-          "coverage_start": "2026-10-14",
-          "coverage_end": "2026-10-17",
+          "coverage_start": "2026-10-20",
+          "coverage_end": "2026-10-23",
           "coverage_days": 4,
           "coverage_complete": true,
           "ignored_past_dates": []
@@ -117,68 +117,68 @@
       "http": {
         "http": [
           {
-            "url": "https://www.jkpbukulja.rs/vesti/rekonstrukcija-magistralnog-cevovoda-od-tomica-kose-do-zabrezja",
+            "url": "https://www.jkpbukulja.rs/vesti/rj-niskogradnja-nastavak-radova-u-shvabica-kraju-zidanje-vodovodnih-shahti",
             "status": 200,
-            "bytes": 195382,
+            "bytes": 191729,
             "content_type": "text/html",
             "charset": "utf-8",
-            "duration_ms": 304
+            "duration_ms": 264
           },
           {
             "url": "https://www.jkpbukulja.rs/vesti/nastavak-radova-na-vodovodnim-shahtama-u-selu-tulezi",
             "status": 200,
-            "bytes": 190271,
+            "bytes": 190377,
             "content_type": "text/html",
             "charset": "utf-8",
-            "duration_ms": 302
+            "duration_ms": 361
           },
           {
             "url": "https://www.jkpbukulja.rs/vesti/nastavljaju-se-radovi-na-izgradnji-cevovoda-u-garashima",
             "status": 200,
-            "bytes": 192105,
+            "bytes": 192168,
             "content_type": "text/html",
             "charset": "utf-8",
-            "duration_ms": 245
+            "duration_ms": 273
           },
           {
             "url": "https://www.jkpbukulja.rs/vesti/u-bukuljskoj-ulici-nakon-rekonstrukcije-dela-vodovodne-linije",
             "status": 200,
-            "bytes": 193087,
+            "bytes": 193193,
             "content_type": "text/html",
             "charset": "utf-8",
-            "duration_ms": 232
+            "duration_ms": 358
           },
           {
             "url": "https://www.jkpbukulja.rs/vesti/nakon-uspeshno-izvedenih-radova-rj-vodovod-i-kanalizacija-na-sanaciji-kvarova-na",
             "status": 200,
-            "bytes": 195717,
+            "bytes": 195823,
             "content_type": "text/html",
             "charset": "utf-8",
-            "duration_ms": 244
+            "duration_ms": 366
           },
           {
             "url": "https://www.jkpbukulja.rs/vesti/sanacija-dva-velika-kvara-na-magistralnom-cevovodu",
             "status": 200,
-            "bytes": 195504,
+            "bytes": 195567,
             "content_type": "text/html",
             "charset": "utf-8",
-            "duration_ms": 241
+            "duration_ms": 354
           },
           {
             "url": "https://www.jkpbukulja.rs/vesti/rj-vik-zidanje-vodovodnih-shahti-u-shvabica-kraju",
             "status": 200,
-            "bytes": 190050,
+            "bytes": 191081,
             "content_type": "text/html",
             "charset": "utf-8",
-            "duration_ms": 12809
+            "duration_ms": 4523
           },
           {
-            "url": "https://www.jkpbukulja.rs/vesti/studenti-u-poseti-postrojenju-za-prechishcavanje-otpadnih-voda-u-banji",
+            "url": "https://www.jkpbukulja.rs/vesti/rekonstrukcija-magistralnog-cevovoda-od-tomica-kose-do-zabrezja",
             "status": 200,
-            "bytes": 194308,
+            "bytes": 196116,
             "content_type": "text/html",
             "charset": "utf-8",
-            "duration_ms": 12886
+            "duration_ms": 4804
           }
         ],
         "cached_articles": 8,
@@ -191,32 +191,72 @@
       ]
     },
     {
-      "provider": "putevi",
+      "provider": "jkp_works",
       "available": true,
-      "count": 1,
-      "items_count": 1,
+      "count": 5,
+      "items_count": 5,
       "error": null,
       "coverage_end": null,
       "http": {
         "http": [
           {
-            "url": "https://www.putevi-srbije.rs/stanje/novamapa/textfile.txt",
+            "url": "https://www.jkpbukulja.rs/vesti",
             "status": 200,
-            "bytes": 100129,
-            "content_type": "text/plain",
-            "charset": "UTF-8",
-            "duration_ms": 17174
+            "bytes": 264680,
+            "content_type": "text/html",
+            "charset": "utf-8",
+            "duration_ms": 5307
+          },
+          {
+            "url": "https://www.jkpbukulja.rs/vesti/rj-niskogradnja-nastavlja-sa-popunjavanjem-udarnih-rupa-na-putevima-u-seoskim-me",
+            "status": 200,
+            "bytes": 193737,
+            "content_type": "text/html",
+            "charset": "utf-8",
+            "duration_ms": 279
+          },
+          {
+            "url": "https://www.jkpbukulja.rs/vesti/rj-niskogradnja-nastavlja-radove-na-sanaciji-udarnih-rupa",
+            "status": 200,
+            "bytes": 196462,
+            "content_type": "text/html",
+            "charset": "utf-8",
+            "duration_ms": 264
+          },
+          {
+            "url": "https://www.jkpbukulja.rs/vesti/rj-chistoca-i-javna-higijena-na-chishcenju-divlje-deponije",
+            "status": 200,
+            "bytes": 194622,
+            "content_type": "text/html",
+            "charset": "utf-8",
+            "duration_ms": 264
+          },
+          {
+            "url": "https://www.jkpbukulja.rs/vesti/ekipa-rj-niskogradnja-nastavlja-radove-na-sanaciji-kolovoznog-zastora-i-popunjav",
+            "status": 200,
+            "bytes": 194967,
+            "content_type": "text/html",
+            "charset": "utf-8",
+            "duration_ms": 5104
+          },
+          {
+            "url": "https://www.jkpbukulja.rs/vesti/ochishcena-divlja-deponija-na-zlataru-kod-dva-kamena",
+            "status": 200,
+            "bytes": 195333,
+            "content_type": "text/html",
+            "charset": "utf-8",
+            "duration_ms": 5151
           }
         ],
-        "cached_articles": 0,
-        "source": "putevi"
+        "cached_articles": 5,
+        "source": "jkp_works"
       },
       "kinds": [
-        "closure"
+        "local_works"
       ]
     },
     {
-      "provider": "opstina",
+      "provider": "putevi",
       "available": true,
       "count": 3,
       "items_count": 3,
@@ -225,12 +265,38 @@
       "http": {
         "http": [
           {
+            "url": "https://www.putevi-srbije.rs/stanje/novamapa/textfile.txt",
+            "status": 200,
+            "bytes": 90882,
+            "content_type": "text/plain",
+            "charset": "UTF-8",
+            "duration_ms": 7235
+          }
+        ],
+        "cached_articles": 0,
+        "source": "putevi"
+      },
+      "kinds": [
+        "closure",
+        "roadworks"
+      ]
+    },
+    {
+      "provider": "opstina",
+      "available": true,
+      "count": 7,
+      "items_count": 7,
+      "error": null,
+      "coverage_end": null,
+      "http": {
+        "http": [
+          {
             "url": "https://arandjelovac.rs/wp-json/wp/v2/posts",
             "status": 200,
-            "bytes": 184542,
+            "bytes": 89145,
             "content_type": "application/json",
             "charset": "UTF-8",
-            "duration_ms": 18478
+            "duration_ms": 7558
           }
         ],
         "cached_articles": 0,
@@ -243,8 +309,8 @@
     {
       "provider": "kultura",
       "available": true,
-      "count": 9,
-      "items_count": 9,
+      "count": 7,
+      "items_count": 7,
       "error": null,
       "coverage_end": null,
       "http": {
@@ -252,10 +318,10 @@
           {
             "url": "https://centarzakulturuarandjelovac.rs/rss",
             "status": 200,
-            "bytes": 9186,
+            "bytes": 6988,
             "content_type": "application/rss+xml",
             "charset": "utf-8",
-            "duration_ms": 17175
+            "duration_ms": 4773
           }
         ],
         "cached_articles": 0,
@@ -281,7 +347,7 @@
             "bytes": 46451,
             "content_type": "application/rss+xml",
             "charset": "UTF-8",
-            "duration_ms": 18241
+            "duration_ms": 5537
           }
         ],
         "cached_articles": 0,
@@ -292,8 +358,8 @@
     {
       "provider": "museum",
       "available": true,
-      "count": 0,
-      "items_count": 0,
+      "count": 4,
+      "items_count": 4,
       "error": null,
       "coverage_end": null,
       "http": {
@@ -304,38 +370,48 @@
             "bytes": 90969,
             "content_type": "application/rss+xml",
             "charset": "UTF-8",
-            "duration_ms": 7288
+            "duration_ms": 6502
+          },
+          {
+            "url": "https://nmar.rs/aktuelne-izlozbe-u-muzeju/",
+            "status": 200,
+            "bytes": 131113,
+            "content_type": "text/html",
+            "charset": "UTF-8",
+            "duration_ms": 901
           }
         ],
         "cached_articles": 0,
         "source": "museum"
       },
-      "kinds": []
+      "kinds": [
+        "listing"
+      ]
     },
     {
       "provider": "library",
-      "available": true,
-      "count": 1,
-      "items_count": 1,
-      "error": null,
+      "available": false,
+      "count": null,
+      "items_count": null,
+      "error": {
+        "scope": "common",
+        "code": "http_error",
+        "message": "Datenquelle antwortet mit HTTP 503."
+      },
       "coverage_end": null,
       "http": {
         "http": [
           {
             "url": "https://www.nbssa.rs/feed/",
-            "status": 200,
-            "bytes": 65834,
-            "content_type": "application/rss+xml",
-            "charset": "UTF-8",
-            "duration_ms": 17606
+            "status": 503,
+            "error": "http_error",
+            "duration_ms": 9169
           }
         ],
         "cached_articles": 0,
         "source": "library"
       },
-      "kinds": [
-        "event"
-      ]
+      "kinds": []
     },
     {
       "provider": "manifestations",
@@ -352,7 +428,7 @@
             "bytes": 107375,
             "content_type": "text/html",
             "charset": "UTF-8",
-            "duration_ms": 18056
+            "duration_ms": 5725
           }
         ],
         "cached_articles": 0,

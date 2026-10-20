@@ -8,7 +8,7 @@ from homeassistant.config_entries import ConfigFlowResult
 from homeassistant.core import callback
 
 from .const import DOMAIN
-from .providers.notices.provider import SOURCES,EVENT_PROVIDERS
+from .providers.notices.provider import SOURCES,EVENT_PROVIDERS,DEFAULT_AREAS
 
 PROVIDERS={'eds':'EDS · Strom',**{key:value['title'] for key,value in SOURCES.items()}}
 
@@ -54,14 +54,14 @@ class ArandjelovacOptionsFlow(config_entries.OptionsFlow):
             errors={}
             if not 1<=user_input.get('lookback_days',30)<=90:errors['lookback_days']='invalid_range'
             if not 1<=user_input.get('horizon_days',60)<=180:errors['horizon_days']='invalid_range'
-            categories=user_input.get('categories','47')
-            if not all(part.strip().isdigit() for part in str(categories).split(',')):errors['categories']='invalid_categories'
+            categories=str(user_input.get('categories','')).strip()
+            if categories and not all(part.strip().isdigit() for part in categories.split(',')):errors['categories']='invalid_categories'
             if not errors:return self.async_create_entry(title='',data=user_input)
         else:errors={}
         options=self.config_entry.options;provider=self.config_entry.data['provider']
         fields={}
         if provider not in ('eds','putevi','manifestations'):fields[vol.Optional('lookback_days',default=options.get('lookback_days',30))]=vol.All(vol.Coerce(int),vol.Range(min=1,max=90))
         if provider in EVENT_PROVIDERS and provider!='manifestations':fields[vol.Optional('horizon_days',default=options.get('horizon_days',60))]=vol.All(vol.Coerce(int),vol.Range(min=1,max=180))
-        if provider=='putevi':fields[vol.Optional('areas',default=options.get('areas','Aranđelovac, Darosava, Ranilović'))]=str
-        if provider=='opstina':fields[vol.Optional('categories',default=options.get('categories','47'))]=str
+        if provider=='putevi':fields[vol.Optional('areas',default=options.get('areas',', '.join(DEFAULT_AREAS)))]=str
+        if provider=='opstina':fields[vol.Optional('categories',default=options.get('categories',''))]=str
         return self.async_show_form(step_id='init',data_schema=vol.Schema(fields),errors=errors)

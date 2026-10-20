@@ -7,8 +7,8 @@ import unittest
 
 import bootstrap
 from live_test.common.models import FetchResult, SourceError, SourceState, validate_projection
-from live_test.providers.notices.parsers import (Article,event_items,item,matches_area,parse_bukulja_article,
-    parse_bukulja_index,parse_feed,parse_manifestations,parse_municipality,parse_traffic,water_notice)
+from live_test.providers.notices.parsers import (Article,bukulja_next_page,event_items,item,local_works_related,matches_area,municipality_relevant,parse_bukulja_article,
+    parse_bukulja_index,parse_feed,parse_manifestations,parse_municipality,parse_museum_listings,parse_traffic,water_notice,water_service_related)
 from live_test.providers.notices.provider import NoticeProvider,NoticeSnapshot,SOURCES
 from live_test.providers.notices.text import TZ,local_time,named_date,normalize,plain,public_link
 
@@ -259,3 +259,145 @@ class FetchTests(unittest.IsolatedAsyncioTestCase):
             def clear_observations(self):pass
             async def get_text(self,*args,**kwargs):return 'not json'
         with self.assertRaises(SourceError):await NoticeProvider('opstina',HTTP()).async_fetch()
+
+
+class SustainableNoticeTests(unittest.TestCase):
+    def test_repair_completion_is_not_supply_confirmation(self):
+        a=article(title='Nakon uspešno izvedenih radova na sanaciji kvarova na magistralnom cevovodu',
+                  text='Ekipe su očistile i oprale Bukuljsku ulicu.')
+        self.assertEqual(water_notice(a)['status'],'repair_completed')
+
+    def test_future_conditional_and_negative_restoration_are_not_facts(self):
+        for text in ['Očekuje se da bude uspostavljeno vodosnabdevanje.',
+                     'Planirano je da bude uspostavljeno vodosnabdevanje.',
+                     'Ukoliko sve bude po planu, biće uspostavljeno vodosnabdevanje.',
+                     'Nije uspostavljeno vodosnabdevanje.']:
+            with self.subTest(text=text):self.assertNotEqual(water_notice(article(text=text))['status'],'restored')
+
+    def test_future_completed_repairs_are_not_a_reported_completion(self):
+        self.assertNotEqual(water_notice(article(text='Očekuje se da radovi budu završeni.'))['status'],'repair_completed')
+
+    def test_education_does_not_count_as_water_service_news(self):
+        a=article(title='Студенти у посети постројењу за пречишћавање отпадних вода у Бањи')
+        self.assertFalse(water_service_related(a))
+        self.assertTrue(water_service_related(article(title='Radovi na vodovodu u Studentskoj ulici')))
+
+    def test_local_roadworks_and_water_stay_separate(self):
+        self.assertTrue(local_works_related(article(title='Niskogradnja popunjava udarne rupe u Tuležima')))
+        self.assertFalse(local_works_related(article(title='Niskogradnja zida vodovodne šahte')))
+
+    def test_tax_notice_is_relevant_across_categories(self):
+        self.assertTrue(municipality_relevant(article(title='Spisak poreskih rešenja za utvrđivanje poreza na imovinu')))
+        self.assertFalse(municipality_relevant(article(title='Odgovori na pitanja JN-24/26')))
+        self.assertFalse(municipality_relevant(article(title='Oglas – INTERNI KONKURS')))
+        self.assertFalse(municipality_relevant(article(title='Izmena Plana javnih nabavki')))
+
+    def test_alternative_outage_wording_is_not_lost_before_reading(self):
+        a=article(title='Obaveštenje',text='Potrošači ostaju bez snabdevanja vodom do završetka radova.')
+        self.assertTrue(water_service_related(a))
+        self.assertEqual(water_notice(a)['status'],'unconfirmed')
+
+    def test_numeric_water_window_dates_are_parsed(self):
+        a=article(title='Planski prekid 15.10.2026.',text='Doci ce do prekida vodosnabdevanja od 8 do 17 casova.')
+        self.assertEqual(water_notice(a)['start_at'],'2026-10-15T08:00:00+02:00')
+
+    def test_museum_listings_have_no_invented_date(self):
+        rows=parse_museum_listings('<h1>Актуелне изложбе у музеју</h1><h2>„У дијалогу“ ретроспективна изложба</h2><h2>Promocija knjige 1.7.2025.</h2>', 'https://nmar.rs/aktuelne-izlozbe-u-muzeju/')
+        self.assertEqual(len(rows),1);self.assertIsNone(rows[0]['published_at'])
+        self.assertIsNone(rows[0]['start_at']);self.assertFalse(rows[0]['date_confirmed'])
+        value=NoticeProvider('museum',None).project(NoticeSnapshot(rows,{}),NOW)
+        self.assertEqual(value.count,1);validate_projection(value,NoticeProvider('museum',None).spec)
+
+    def test_unknown_museum_markup_is_not_a_false_zero(self):
+        with self.assertRaises(SourceError):parse_museum_listings('<h1>Maintenance</h1>','https://nmar.rs/')
+
+    def test_archive_next_page_keeps_bounded_same_source_url(self):
+        self.assertEqual(bukulja_next_page(index()+'<a href="/vesti?page=2">Следећа</a>',BASE),BASE+'?page=2')
+        self.assertIsNone(bukulja_next_page(index(),BASE))
+        with self.assertRaises(SourceError):bukulja_next_page(index()+'<a href="/vesti?redirect=evil">Следећа</a>',BASE)
+
+    def test_elapsed_planned_water_window_is_not_silently_removed(self):
+        a=article(title='Planski prekid vodosnabdevanja 14. oktobra 2026.',text='Doci ce do prekida vodosnabdevanja od 8 do 12 casova.')
+        provider=NoticeProvider('jkp',None)
+        result=provider.project(NoticeSnapshot((water_notice(a),),{}),NOW)
+        self.assertEqual(result.count,1)
+        self.assertEqual(result.items[0]['status'],'planned_end_passed')
+        self.assertEqual(result.metadata['outage_notices'],1)
+
+    def test_old_elapsed_window_is_history_not_supply_confirmation(self):
+        a=replace(article(title='Planski prekid vodosnabdevanja 7. oktobra 2026.',text='Doci ce do prekida vodosnabdevanja od 8 do 12 casova.'),published=NOW-timedelta(days=7))
+        result=NoticeProvider('jkp',None).project(NoticeSnapshot((water_notice(a),),{}),NOW)
+        self.assertEqual(result.items[0]['status'],'historical_unconfirmed')
+        self.assertEqual(result.metadata['outage_notices'],0)
+
+    def test_open_incident_precedes_newer_information(self):
+        incident=water_notice(replace(article(text='Prekid vodosnabdevanja bez kraja.'),id='incident',published=NOW-timedelta(days=1)))
+        info=water_notice(article(text='Radovi na cevovodu.'))
+        result=NoticeProvider('jkp',None).project(NoticeSnapshot((info,incident),{}),NOW)
+        self.assertEqual(result.items[0]['id'],'incident')
+
+    def test_default_traffic_covers_nearby_routes_without_backa_topola(self):
+        raw=HEADER+traffic_row(title='Radovi deonica Topola - Bozurnja')+traffic_row(title='Radovi Bačka Topola - Novi Sad',text='Od 8 do 17 radovi.')
+        rows=parse_traffic(raw,'https://www.putevi-srbije.rs/',NOW)
+        result=NoticeProvider('putevi',None).project(NoticeSnapshot(rows,{}),NOW)
+        self.assertEqual(result.count,1)
+        self.assertIn('Topola',result.items[0]['matched_areas'])
+        custom=NoticeProvider('putevi',None,options={'areas':'Aranđelovac'})
+        self.assertEqual(custom.project(NoticeSnapshot(rows,{}),NOW).count,0)
+
+
+class SustainableFetchTests(unittest.IsolatedAsyncioTestCase):
+    async def test_museum_supplement_failure_is_visible_without_losing_feed(self):
+        class HTTP:
+            def clear_observations(self):pass
+            async def get_text(self,url,**kwargs):
+                return feed(url='https://nmar.rs/example') if url.endswith('/feed/') else '<h1>Maintenance</h1>'
+        result=await NoticeProvider('museum',HTTP(),clock=lambda:NOW).async_fetch()
+        self.assertEqual(len(result.payload.records),1)
+        self.assertFalse(result.payload.metadata['complete_for_window'])
+        self.assertEqual(result.payload.metadata['supplement_error']['code'],'exhibition_structure')
+
+    async def test_municipal_default_uses_all_categories_and_pagination(self):
+        from urllib.parse import parse_qs,urlsplit
+        class HTTP:
+            def __init__(self):self.calls=[]
+            def clear_observations(self):pass
+            async def get_text(self,url,**kwargs):
+                self.calls.append(url);page=int(parse_qs(urlsplit(url).query)['page'][0])
+                ids=range(1,101) if page==1 else [101]
+                return json.dumps([{'id':i,'date_gmt':'2026-10-13T08:00:00','link':f'https://arandjelovac.rs/post-{i}',
+                    'title':{'rendered':'Javna nabavka JN-1/26' if i<101 else 'Poreska rešenja'},'content':{'rendered':'Text'}} for i in ids])
+        http=HTTP();provider=NoticeProvider('opstina',http,clock=lambda:NOW)
+        result=await provider.async_fetch()
+        self.assertEqual(len(http.calls),2)
+        self.assertNotIn('categories=',http.calls[0]);self.assertIn('after=',http.calls[0])
+        self.assertEqual([r['title'] for r in result.payload.records],['Poreska rešenja'])
+        self.assertTrue(result.payload.metadata['complete_for_window'])
+        self.assertEqual(result.payload.metadata['excluded_articles'],100)
+        custom=HTTP();await NoticeProvider('opstina',custom,options={'categories':'47'},clock=lambda:NOW).async_fetch()
+        self.assertIn('categories=47',custom.calls[0])
+
+    async def test_bukulja_follows_recent_pages_and_refreshes_changed_articles(self):
+        class HTTP:
+            def __init__(self):self.calls=[];self.updated=False
+            def clear_observations(self):pass
+            async def get_text(self,url,**kwargs):
+                self.calls.append(url)
+                if url==BASE:return index()+'<a href="/vesti?page=2">Следећа</a>'
+                if url==BASE+'?page=2':return index(title='Vodovodna mreža',text='13. октобар 2026.').replace('/primer','/drugi')
+                text='Vodosnabdevanje je normalizovano.' if self.updated else 'Prekid vodosnabdevanja.'
+                return '<h1>Vodovod</h1><div class="page-content"><p>'+text+'</p></div>'
+        http=HTTP();clock=[NOW];provider=NoticeProvider('jkp',http,clock=lambda:clock[0])
+        first=await provider.async_fetch();self.assertEqual(len(first.payload.records),2)
+        self.assertEqual(first.payload.metadata['pages_checked'],2)
+        self.assertEqual(first.payload.records[0]['status'],'unconfirmed')
+        http.updated=True;clock[0]+=timedelta(minutes=15)
+        second=await provider.async_fetch()
+        self.assertEqual(second.payload.records[0]['status'],'restored')
+        self.assertEqual(http.calls.count(BASE+'/primer'),2)
+
+    async def test_bukulja_repeat_page_fails_instead_of_false_empty(self):
+        class HTTP:
+            def clear_observations(self):pass
+            async def get_text(self,*args,**kwargs):return index()+'<a href="/vesti?page=2">Следећа</a>'
+        with self.assertRaises(SourceError):await NoticeProvider('jkp',HTTP(),clock=lambda:NOW).async_fetch()

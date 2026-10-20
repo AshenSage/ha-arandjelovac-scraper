@@ -4,7 +4,7 @@
     "step": {
       "user": {
         "title": "Aranđelovac Live",
-        "description": "Set up all nine sources or one source. The complete package adds missing entries and preserves existing sources.",
+        "description": "Set up all ten sources or one source. The complete package adds missing entries and preserves existing sources.",
         "data": {
           "provider": "Source"
         }
@@ -24,13 +24,13 @@
           "lookback_days": "Notice lookback days",
           "horizon_days": "Event horizon days",
           "areas": "Places, comma-separated",
-          "categories": "Municipal categories (47 = news)"
+          "categories": "Municipal categories (empty = all)"
         }
       }
     },
     "error": {
       "invalid_range": "Value outside the allowed range.",
-      "invalid_categories": "Use comma-separated numeric categories."
+      "invalid_categories": "Leave empty or use comma-separated numeric categories."
     }
   },
   "entity": {
@@ -61,6 +61,9 @@
       },
       "manifestations_events": {
         "name": "Festivals and markets"
+      },
+      "jkp_works": {
+        "name": "Local works notices"
       }
     }
   }

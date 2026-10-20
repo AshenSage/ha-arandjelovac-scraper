@@ -9,6 +9,7 @@ from html.parser import HTMLParser
 from io import StringIO
 import json
 import re
+from urllib.parse import parse_qs, urlsplit
 import xml.etree.ElementTree as ET
 
 from ...common.models import SourceError
@@ -87,15 +88,18 @@ def parse_municipality(raw: str, base: str) -> tuple[Article,...]:
 
 class BukuljaIndex(HTMLParser):
     def __init__(self):
-        super().__init__(convert_charrefs=True);self.links={};self.current=None;self.parts=[];self.heading=[];self.in_heading=False;self.headers=[];self.h1=False;self.title=''
+        super().__init__(convert_charrefs=True);self.links={};self.current=None;self.parts=[];self.heading=[];self.in_heading=False;self.headers=[];self.h1=False;self.title='';self.next_link=None;self.page_link=None;self.page_parts=[]
     def handle_starttag(self,tag,attrs):
         attrs=dict(attrs)
         if tag=='h1':self.h1=True
+        if tag=='a' and attrs.get('href','').startswith('/vesti?'):
+            self.page_link=attrs['href'];self.page_parts=[]
         if tag=='a' and re.fullmatch(r'/vesti/[a-z0-9-]+',attrs.get('href','')):
             self.current=attrs['href'];self.parts=[];self.heading=[]
         if self.current and tag in ('h2','h3'):self.in_heading=True
     def handle_data(self,data):
         if self.h1:self.title+=data
+        if self.page_link:self.page_parts.append(data)
         if self.current:
             self.parts.append(data+' ')
             if self.in_heading:self.heading.append(data)
@@ -106,6 +110,19 @@ class BukuljaIndex(HTMLParser):
             text=' '.join(''.join(self.parts).split());title=' '.join(''.join(self.heading).split())
             if title and self.current not in self.links:self.links[self.current]=(title,text)
             self.current=None
+        if tag=='a' and self.page_link:
+            if normalize(''.join(self.page_parts).strip()) in ('sledeca','sledece','next'):
+                self.next_link=self.page_link
+            self.page_link=None
+
+
+def bukulja_next_page(raw: str, base: str) -> str | None:
+    parser=BukuljaIndex();parser.feed(raw)
+    if not parser.next_link:return None
+    url=public_link(parser.next_link,base);parts=urlsplit(url);query=parse_qs(parts.query)
+    if parts.path!='/vesti' or set(query)!={'page'} or len(query['page'])!=1 or not query['page'][0].isdigit():
+        raise SourceError('pagination','Unbekannte Bukulja-Folgeseite.',scope='jkp')
+    return url
 
 
 def parse_bukulja_index(raw: str, base: str, now: datetime) -> tuple[Article,...]:
@@ -152,19 +169,48 @@ def parse_bukulja_article(raw: str, seed: Article) -> Article:
 
 
 def water_related(article: Article) -> bool:
-    return bool(re.search(r'vodovod|vodosnab|cevovod|\bvod[aeui]\b|\bvik\b',normalize(article.title+' '+article.text)))
+    return bool(re.search(r'vodovod|vodosnab|cevovod|\bvod(?:a|e|i|u|om)\b|\bvik\b',normalize(article.title+' '+article.text)))
+
+
+def water_service_related(article: Article) -> bool:
+    """Keep service news, not school visits that merely mention water."""
+    heading=normalize(article.title)
+    return water_related(article) and not re.search(r'(?:student|ucenic).{0,60}poset|poset.{0,60}(?:student|ucenic)',heading)
+
+
+def local_works_related(article: Article) -> bool:
+    text=normalize(article.title+' '+article.text)
+    return not water_related(article) and bool(re.search(
+        r'kolovoz|udarni[hme]*\s+rup|saobracaj|niskograd|odvoz|otpad|gasovod|cistoc',text))
+
+
+def municipality_relevant(article: Article) -> bool:
+    """Citizen notices span categories; procurement and internal jobs are separate."""
+    title=normalize(article.title)
+    return not re.search(r'javn\w*\s+nabav\w*|\bjn\s*[-–]?\s*\d|interni\s+konkurs',title)
+
+
+def _asserted(text: str, pattern: str) -> bool:
+    # Do not turn an expected, conditional, negative or future outcome into fact.
+    for sentence in re.split(r'[.!?;\n]+',normalize(text)):
+        if re.search(pattern,sentence) and not re.search(
+            r'\b(?:nije|nisu|nece|bice|ukoliko|ako)\b|ocekuj|planir|trebalo|\bce\s+biti\b',sentence):
+            return True
+    return False
 
 
 def water_notice(article: Article) -> dict:
     if article.image_only:
         return item(article,'water_unknown',status='image_only',description='Bildbeitrag: Der Inhalt wurde nicht automatisch ausgewertet. Bitte Original öffnen.')
     text=normalize(article.title+'\n'+article.text)
-    outage=bool(re.search(r'(?:prekid|obustav).{0,90}vodosnab|bez vode|vodosnab.{0,50}(?:prekid|obustav)',text,re.S))
-    restored=bool(re.search(r'vodosnabdevanje\s+(?:je\s+)?(?:ponovo\s+)?(?:normalizovano|uspostavljeno)|uspostavljeno\s+(?:je\s+)?(?:redovno\s+)?vodosnabdevanje',text))
-    result=item(article,'water_outage' if outage or restored else 'water_info',status='restored' if restored else 'unconfirmed' if outage else 'information')
-    if outage and not restored:
+    outage=bool(re.search(r'(?:prekid|obustav).{0,90}(?:vodosnab|snabdevanj.{0,15}vod)|bez\s+(?:snabdevanja\s+)?vod(?:e|om)\b|vodosnab.{0,50}(?:prekid|obustav)',text,re.S))
+    restored=_asserted(article.title+'\n'+article.text,r'vodosnabdevanje\s+(?:je\s+)?(?:ponovo\s+)?(?:normalizovano|uspostavljeno)|uspostavljeno\s+(?:je\s+)?(?:redovno\s+)?vodosnabdevanje')
+    completed=_asserted(article.title+'\n'+article.text,
+        r'(?:nakon|posle)\s+uspesno\s+(?:izvedenih|zavrsenih)\s+radova|radovi\s+(?:su\s+)?(?:uspesno\s+)?zavrseni|kvar\s+(?:je\s+)?(?:uspesno\s+)?(?:saniran|otklonjen)')
+    result=item(article,'water_outage' if outage or restored else 'water_info',status='restored' if restored else 'repair_completed' if completed else 'unconfirmed' if outage else 'information')
+    if outage and not restored and not completed:
         # A calendar date and an explicit time range are necessary for a plan.
-        day=named_date(article.title,article.published) or named_date(article.text,article.published)
+        day=numeric_event_date(article.title) or named_date(article.title,article.published) or numeric_event_date(article.text) or named_date(article.text,article.published)
         times=re.search(r'(?:od|periodu\s+od)\s*(\d{1,2})(?::(\d{2}))?\s*do\s*(\d{1,2})(?::(\d{2}))?\s*(?:cas|sat|h\b)',text)
         if day and times and ('plan' in text or 'doci ce' in text):
             start=local_time(day.year,day.month,day.day,int(times[1]),int(times[2] or 0))
@@ -273,6 +319,39 @@ def parse_manifestations(raw: str,base: str) -> tuple[dict,...]:
                      'date_confirmed':False})
     if not rows or len(rows)>50:raise SourceError('calendar_structure','Unplausibler Umfang der Veranstaltungsübersicht.',scope='manifestations')
     return tuple(rows)
+
+
+class MuseumListingsParser(HTMLParser):
+    def __init__(self):
+        super().__init__(convert_charrefs=True);self.tag=None;self.parts=[];self.headers=[]
+    def handle_starttag(self,tag,attrs):
+        if tag in ('h1','h2'):self.tag=tag;self.parts=[]
+    def handle_data(self,data):
+        if self.tag:self.parts.append(data)
+    def handle_endtag(self,tag):
+        if tag==self.tag:self.headers.append((tag,' '.join(''.join(self.parts).split())));self.tag=None
+
+
+def parse_museum_listings(raw: str, base: str) -> tuple[dict,...]:
+    """Undated official exhibition listings, never invented calendar events."""
+    parser=MuseumListingsParser();parser.feed(raw)
+    if not any(tag=='h1' and 'aktuelne izlozbe' in normalize(text) for tag,text in parser.headers):
+        raise SourceError('exhibition_structure','Museums-Ausstellungsseite nicht erkannt.',scope='museum')
+    result=[];seen=set()
+    for tag,title in parser.headers:
+        if tag!='h2' or not title.startswith(('„','“','"','«')):continue
+        text=normalize(title)
+        if re.search(r'promocij|predstavlj|knjig|\d{1,2}\.\s*\d{1,2}\.\s*20\d{2}',text):continue
+        if title in seen:continue
+        seen.add(title)
+        result.append({'id':'museum-listing:'+sha256(title.encode()).hexdigest()[:20],
+                       'title':excerpt(title,350),'description':'Von der Museumsseite als Ausstellung aufgeführt; Beginn, Ende und aktuelle Laufzeit sind nicht bestätigt.',
+                       'description_is_excerpt':True,'source_url':base,'published_at':None,
+                       'kind':'listing','status':'listing_unconfirmed','event_type':'exhibition',
+                       'start_at':None,'end_at':None,'date_confirmed':False})
+    if not result or len(result)>30:
+        raise SourceError('exhibition_structure','Museums-Ausstellungen nicht eindeutig lesbar.',scope='museum')
+    return tuple(result)
 
 
 def numeric_event_date(text: str) -> datetime | None:
